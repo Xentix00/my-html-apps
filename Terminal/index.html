@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CYBER-TERM // PWA</title>
+    <meta name="theme-color" content="#000000"/>
+    <meta name="description" content="Cyberpunk Terminal Interface PWA">
+    <link rel="manifest" href="manifest.json">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Ubuntu+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --neon-green: #0f0;
+            --neon-blue: #0ff;
+            --neon-pink: #f0f;
+            --neon-yellow: #ff0;
+            --dark-bg: #000;
+            --darker-bg: #111;
+            --terminal-text: #ccc;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Share Tech Mono', monospace;
+        }
+        
+        body {
+            background-color: var(--dark-bg);
+            color: var(--neon-green);
+            min-height: 100vh;
+            overflow: hidden;
+            padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+            position: relative;
+        }
+        
+        /* Scanline effect overlay */
+        body::after {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(transparent 50%, rgba(0, 0, 0, 0.1) 50%);
+            background-size: 100% 4px;
+            z-index: 100;
+            pointer-events: none;
+            opacity: 0.3;
+        }
+        
+        /* Noise effect */
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+            opacity: 0.05;
+            z-index: 99;
+            pointer-events: none;
+        }
+        
+        .terminal-container {
+            max-width: 100%;
+            height: 100vh;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            background-color: var(--darker-bg);
+            border: 1px solid var(--neon-blue);
+            box-shadow: 0 0 10px var(--neon-blue), 
+                        inset 0 0 10px var(--neon-blue);
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .terminal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--neon-green);
+            margin-bottom: 15px;
+            text-shadow: 0 0 5px var(--neon-green);
+        }
+        
+        .terminal-title {
+            font-size: 1.2rem;
+            letter-spacing: 2px;
+            color: var(--neon-green);
+        }
+        
+        .terminal-date {
+            font-size: 0.9rem;
+            color: var(--neon-blue);
+        }
+        
+        .terminal-output {
+            flex: 1;
+            overflow-y: auto;
+            margin-bottom: 10px;
+            padding-right: 5px;
+        }
+        
+        .terminal-output::-webkit-scrollbar {
+            width: 5px;
+        }
+        
+        .terminal-output::-webkit-scrollbar-thumb {
+            background: var(--neon-green);
+            border-radius: 2px;
+        }
+        
+        .output-line {
+            margin-bottom: 8px;
+            line-height: 1.4;
+            opacity: 0;
+            animation: fadeIn 0.5s forwards;
+            animation-delay: calc(var(--line-index) * 0.1s);
+        }
+        
+        .command-input {
+            display: flex;
+            align-items: center;
+            padding-top: 10px;
+            border-top: 1px solid var(--neon-pink);
+        }
+        
+        .prompt {
+            color: var(--neon-yellow);
+            margin-right: 10px;
+            font-weight: bold;
+        }
+        
+        #command {
+            flex: 1;
+            background: transparent;
+            border: none;
+            color: var(--neon-green);
+            font-size: 1rem;
+            outline: none;
+            caret-color: var(--neon-green);
+            text-shadow: 0 0 5px var(--neon-green);
+        }
+        
+        .glitch-text {
+            position: relative;
+            display: inline-block;
+        }
+        
+        .glitch-text::before,
+        .glitch-text::after {
+            content: attr(data-text);
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+        
+        .glitch-text::before {
+            animation: glitch-effect 3s infinite;
+            color: var(--neon-pink);
+            z-index: -1;
+        }
+        
+        .glitch-text::after {
+            animation: glitch-effect 2s infinite;
+            color: var(--neon-blue);
+            z-index: -2;
+        }
+        
+        .neon-border {
+            border: 1px solid var(--neon-blue);
+            box-shadow: 0 0 5px var(--neon-blue), 
+                        inset 0 0 5px var(--neon-blue);
+            padding: 10px;
+            margin: 10px 0;
+        }
+        
+        .hacker-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            gap: 10px;
+            margin: 15px 0;
+        }
+        
+        .grid-item {
+            background-color: rgba(0, 255, 255, 0.1);
+            border: 1px solid var(--neon-blue);
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            font-size: 0.8rem;
+            transition: all 0.3s;
+        }
+        
+        .grid-item:hover {
+            background-color: rgba(0, 255, 255, 0.3);
+            box-shadow: 0 0 10px var(--neon-blue);
+        }
+        
+        .system-status {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 15px;
+            font-size: 0.8rem;
+        }
+        
+        .status-item {
+            display: flex;
+            align-items: center;
+        }
+        
+        .status-led {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            margin-right: 5px;
+            background-color: var(--neon-green);
+            box-shadow: 0 0 5px var(--neon-green);
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        @keyframes glitch-effect {
+            0% { transform: translate(0); }
+            20% { transform: translate(-2px, 2px); }
+            40% { transform: translate(-2px, -2px); }
+            60% { transform: translate(2px, 2px); }
+            80% { transform: translate(2px, -2px); }
+            100% { transform: translate(0); }
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 0.5; }
+            50% { opacity: 1; }
+            100% { opacity: 0.5; }
+        }
+        
+        @keyframes matrix-rain {
+            0% { transform: translateY(-100%); }
+            100% { transform: translateY(100vh); }
+        }
+        
+        .matrix-rain {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 98;
+            overflow: hidden;
+        }
+        
+        .rain-column {
+            position: absolute;
+            top: -100%;
+            width: 20px;
+            animation: matrix-rain 15s linear infinite;
+            animation-delay: calc(var(--column-index) * 0.5s);
+            color: var(--neon-green);
+            font-size: 18px;
+            writing-mode: vertical-rl;
+            text-orientation: upright;
+            opacity: 0.7;
+        }
+        
+        .cyber-button {
+            background: transparent;
+            color: var(--neon-pink);
+            border: 1px solid var(--neon-pink);
+            padding: 8px 15px;
+            margin: 5px;
+            cursor: pointer;
+            text-shadow: 0 0 5px var(--neon-pink);
+            box-shadow: 0 0 5px var(--neon-pink);
+            transition: all 0.3s;
+        }
+        
+        .cyber-button:hover {
+            background-color: rgba(255, 0, 255, 0.1);
+            box-shadow: 0 0 10px var(--neon-pink);
+        }
+        
+        @media (max-width: 768px) {
+            .terminal-container {
+                padding: 10px;
+                border: none;
+                box-shadow: none;
+            }
+            
+            .terminal-title {
+                font-size: 1rem;
+            }
+            
+            .hacker-grid {
+                grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+            }
+            
+            .grid-item {
+                height: 50px;
+                font-size: 0.7rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="matrix-rain" id="matrixRain"></div>
+    
+    <div class="terminal-container">
+        <div class="terminal-header">
+            <div class="terminal-title glitch-text" data-text="CYBER-TERM v3.2.5">CYBER-TERM v3.2.5</div>
+            <div class="terminal-date" id="currentDate">2023-11-05 23:59:45</div>
+        </div>
+        
+        <div class="terminal-output" id="output">
+            <div class="output-line" style="--line-index: 1">> SYSTEM BOOT INITIATED</div>
+            <div class="output-line" style="--line-index: 2">> MEMORY CHECK: <span style="color: var(--neon-green);">1024MB/1024MB OK</span></div>
+            <div class="output-line" style="--line-index: 3">> NEURAL INTERFACE: <span style="color: var(--neon-blue);">ACTIVE</span></div>
+            <div class="output-line" style="--line-index: 4">> ENCRYPTION MODULE: <span style="color: var(--neon-yellow);">AES-256 ACTIVE</span></div>
+            <div class="output-line" style="--line-index: 5">> CONNECTING TO MAINFRAME... <span style="color: var(--neon-green);">CONNECTED</span></div>
+            <div class="output-line" style="--line-index: 6">> WARNING: MULTIPLE SECURITY BREACHES DETECTED</div>
+            <div class="output-line" style="--line-index: 7">> RUNNING DIAGNOSTICS...</div>
+            <div class="output-line" style="--line-index: 8">> TYPE 'help' FOR AVAILABLE COMMANDS</div>
+            <div class="output-line" style="--line-index: 9">> CUSTOM ICON SUPPORT: <span style="color: var(--neon-green);">ENABLED</span></div>
+        </div>
+        
+        <div class="command-input">
+            <span class="prompt">></span>
+            <input type="text" id="command" autocomplete="off" autofocus>
+        </div>
+        
+        <div class="system-status">
+            <div class="status-item">
+                <div class="status-led"></div>
+                <span>PWR: STABLE</span>
+            </div>
+            <div class="status-item">
+                <div class="status-led" style="background-color: var(--neon-blue); box-shadow: 0 0 5px var(--neon-blue);"></div>
+                <span>NET: SECURE</span>
+            </div>
+            <div class="status-item">
+                <div class="status-led" style="background-color: var(--neon-pink); box-shadow: 0 0 5px var(--neon-pink);"></div>
+                <span>SYS: OPERATIONAL</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Create matrix rain effect
+        const matrixRain = document.getElementById('matrixRain');
+        const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789$#@%&!?=*';
+        
+        for (let i = 0; i < 20; i++) {
+            const column = document.createElement('div');
+            column.className = 'rain-column';
+            column.style.setProperty('--column-index', i);
+            column.style.left = `${(i * 5) + Math.random() * 5}%`;
+            
+            let content = '';
+            for (let j = 0; j < 50; j++) {
+                content += characters.charAt(Math.floor(Math.random() * characters.length));
+            }
+            
+            column.textContent = content;
+            matrixRain.appendChild(column);
+        }
+        
+        // Update date and time
+        function updateDateTime() {
+            const now = new Date();
+            const dateStr = now.toISOString().slice(0, 10);
+            const timeStr = now.toTimeString().slice(0, 8);
+            document.getElementById('currentDate').textContent = `${dateStr} ${timeStr}`;
+        }
+        
+        setInterval(updateDateTime, 1000);
+        updateDateTime();
+        
+        // Terminal functionality
+        const commandInput = document.getElementById('command');
+        const outputContainer = document.getElementById('output');
+        
+        const commands = {
+            'help': 'Available commands: help, clear, status, scan, encrypt, decrypt, reboot, icon',
+            'clear': function() {
+                outputContainer.innerHTML = '';
+                addOutputLine('> TERMINAL CLEARED');
+            },
+            'status': function() {
+                addOutputLine('> SYSTEM STATUS: NOMINAL');
+                addOutputLine('> SECURITY: MULTIPLE LAYERS ACTIVE');
+                addOutputLine('> CONNECTIONS: ENCRYPTED AND SECURE');
+            },
+            'scan': function() {
+                addOutputLine('> INITIATING NETWORK SCAN...');
+                setTimeout(() => {
+                    addOutputLine('> WARNING: ' + Math.floor(Math.random() * 10) + ' THREATS DETECTED');
+                }, 1000);
+            },
+            'reboot': function() {
+                addOutputLine('> WARNING: SYSTEM REBOOT INITIATED');
+                outputContainer.innerHTML = '';
+                setTimeout(() => {
+                    for (let i = 1; i <= 9; i++) {
+                        setTimeout(() => {
+                            addOutputLine(document.querySelectorAll('.output-line')[i-1].textContent);
+                        }, i * 200);
+                    }
+                }, 1000);
+            },
+            'icon': function() {
+                addOutputLine('> CUSTOM ICON SUPPORT ENABLED');
+                addOutputLine('> PLACE YOUR "icon.png" IN THE TERMINAL FOLDER');
+                addOutputLine('> RELOAD THE APP TO SEE YOUR CUSTOM ICON');
+            }
+        };
+        
+        commandInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                const command = this.value.trim().toLowerCase();
+                this.value = '';
+                
+                addOutputLine('> ' + command);
+                
+                if (commands[command]) {
+                    if (typeof commands[command] === 'function') {
+                        commands[command]();
+                    } else {
+                        addOutputLine(commands[command]);
+                    }
+                } else if (command) {
+                    addOutputLine('> UNRECOGNIZED COMMAND: ' + command);
+                    addOutputLine('> TYPE "help" FOR AVAILABLE COMMANDS');
+                }
+                
+                // Scroll to bottom
+                outputContainer.scrollTop = outputContainer.scrollHeight;
+            }
+        });
+        
+        function addOutputLine(text) {
+            const line = document.createElement('div');
+            line.className = 'output-line';
+            line.textContent = text;
+            line.style.setProperty('--line-index', outputContainer.children.length);
+            outputContainer.appendChild(line);
+            
+            // Remove old lines if too many
+            if (outputContainer.children.length > 100) {
+                outputContainer.removeChild(outputContainer.children[0]);
+            }
+        }
+        
+        // Add some random system messages
+        setInterval(() => {
+            const messages = [
+                '> NETWORK TRAFFIC: ' + Math.floor(Math.random() * 1000) + 'MB/S',
+                '> ENCRYPTION: AES-256 ACTIVE',
+                '> INTRUSION ATTEMPT BLOCKED',
+                '> SYSTEM INTEGRITY: 100%',
+                '> DATA FLOW: OPTIMAL'
+            ];
+            
+            if (Math.random() > 0.7) {
+                addOutputLine(messages[Math.floor(Math.random() * messages.length)]);
+                outputContainer.scrollTop = outputContainer.scrollHeight;
+            }
+        }, 5000);
+        
+        // Register service worker for PWA functionality
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', function() {
+                navigator.serviceWorker.register('sw.js')
+                .then(function(registration) {
+                    console.log('ServiceWorker registration successful');
+                })
+                .catch(function(error) {
+                    console.log('ServiceWorker registration failed: ', error);
+                });
+            });
+        }
+        
+        // Handle app installation
+        let deferredPrompt;
+        
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            
+            // Show custom install prompt
+            setTimeout(() => {
+                if (confirm('Install CYBER-TERM as a standalone app?')) {
+                    deferredPrompt.prompt();
+                }
+            }, 3000);
+        });
+    </script>
+</body>
+</html>
