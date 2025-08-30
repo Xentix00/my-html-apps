@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Glass Calc</title>
+
+  <!-- iOS PWA chrome -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Glass Calc">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+
+  <!-- PWA manifest -->
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#0a0a0b" />
+
+  <style>
+    :root {
+      --bg: #0b0c0f;
+      --card: rgba(255,255,255,0.08);
+      --frost: rgba(255,255,255,0.12);
+      --text: #e9edf1;
+      --muted: #aeb6bf;
+      --accent: #7aa2ff;
+      --accent-2: #4ade80;
+      --btn: rgba(255,255,255,0.06);
+      --btn-hover: rgba(255,255,255,0.12);
+      --operator: #2a2f3a;
+      --danger: #ef4444;
+      --shadow: 0 10px 30px rgba(0,0,0,0.35);
+    }
+    :root.light {
+      --bg: #f6f7fb;
+      --card: rgba(255,255,255,0.7);
+      --frost: rgba(255,255,255,0.5);
+      --text: #121418;
+      --muted: #3d4753;
+      --accent: #2563eb;
+      --accent-2: #16a34a;
+      --btn: rgba(0,0,0,0.04);
+      --btn-hover: rgba(0,0,0,0.08);
+      --operator: #e8ecf4;
+      --danger: #dc2626;
+      --shadow: 0 10px 30px rgba(0,0,0,0.08);
+    }
+
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    html, body { height: 100%; }
+    body {
+      margin: 0;
+      font-family: ui-rounded, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+      background:
+        radial-gradient(80vw 80vh at 10% -10%, rgba(122,162,255,0.20), transparent 60%),
+        radial-gradient(70vw 60vh at 110% 110%, rgba(74,222,128,0.18), transparent 60%),
+        var(--bg);
+      color: var(--text);
+      display: grid;
+      place-items: center;
+      padding: 20px;
+    }
+
+    .app {
+      width: min(420px, 92vw);
+      backdrop-filter: blur(18px) saturate(140%);
+      -webkit-backdrop-filter: blur(18px) saturate(140%);
+      background: var(--card);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 26px;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: env(safe-area-inset-top) 16px 12px 16px;
+      background: linear-gradient(180deg, var(--frost), transparent);
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+    }
+    .title {
+      font-weight: 700;
+      letter-spacing: 0.3px;
+    }
+    .controls { display: flex; gap: 8px; align-items: center; }
+    .chip {
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: var(--btn);
+      border: 1px solid rgba(255,255,255,0.12);
+      font-size: 12px;
+      cursor: pointer;
+      user-select: none;
+    }
+    .chip:active { transform: scale(0.98); }
+
+    .display {
+      padding: 18px 20px 10px 20px;
+      text-align: right;
+      min-height: 120px;
+      display: grid;
+      align-items: end;
+      gap: 8px;
+      background: linear-gradient(180deg, transparent 0%, rgba(0,0,0,0.06) 100%);
+    }
+    .history {
+      color: var(--muted);
+      font-size: 14px;
+      min-height: 22px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .result {
+      font-size: clamp(36px, 7vw, 48px);
+      font-weight: 800;
+      line-height: 1.1;
+      letter-spacing: -0.02em;
+      word-break: break-all;
+    }
+
+    .grid {
+      padding: 12px;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+    }
+    button.key {
+      padding: 18px 14px;
+      font-size: 20px;
+      border: 1px solid rgba(255,255,255,0.12);
+      background: var(--btn);
+      color: var(--text);
+      border-radius: 18px;
+      cursor: pointer;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.06);
+      transition: transform .08s ease, background .15s ease;
+      user-select: none;
+    }
+    button.key:active {
+      transform: translateY(1px) scale(0.99);
+      background: var(--btn-hover);
+    }
+    button.op { background: var(--operator); border-color: transparent; font-weight: 700; }
+    button.equals { background: linear-gradient(135deg, var(--accent), var(--accent-2)); border: none; color: white; font-weight: 800; }
+    button.span-2 { grid-column: span 2; }
+
+    .footer {
+      padding: 8px 14px env(safe-area-inset-bottom) 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      color: var(--muted);
+      font-size: 12px;
+      border-top: 1px solid rgba(255,255,255,0.08);
+      background: linear-gradient(0deg, var(--frost), transparent);
+    }
+    .switch {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      user-select: none;
+    }
+    .switch input { display: none; }
+    .toggle {
+      width: 48px; height: 28px; border-radius: 999px;
+      background: var(--btn);
+      border: 1px solid rgba(255,255,255,0.12);
+      position: relative;
+      transition: background .2s ease;
+    }
+    .knob {
+      position: absolute; top: 50%; left: 2px;
+      transform: translate(0,-50%);
+      width: 24px; height: 24px; border-radius: 50%;
+      background: white;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+      transition: transform .2s ease;
+    }
+    input:checked + .toggle .knob { transform: translate(20px,-50%); }
+  </style>
+</head>
+<body>
+  <div class="app" role="application" aria-label="Calculator">
+    <div class="topbar">
+      <div class="title">Glass Calc</div>
+      <div class="controls">
+        <div id="themeChip" class="chip" role="button" aria-pressed="false">Appearance</div>
+        <div id="clearChip" class="chip" role="button" aria-pressed="false">AC</div>
+      </div>
+    </div>
+
+    <div class="display" id="display">
+      <div class="history" id="history">&nbsp;</div>
+      <div class="result" id="result">0</div>
+    </div>
+
+    <div class="grid" id="keys">
+      <button class="key" data-key="%" aria-label="percent">%</button>
+      <button class="key" data-key="±" aria-label="plus minus">±</button>
+      <button class="key" data-key="C" aria-label="clear">C</button>
+      <button class="key op" data-key="÷" aria-label="divide">÷</button>
+
+      <button class="key" data-key="7">7</button>
+      <button class="key" data-key="8">8</button>
+      <button class="key" data-key="9">9</button>
+      <button class="key op" data-key="×" aria-label="multiply">×</button>
+
+      <button class="key" data-key="4">4</button>
+      <button class="key" data-key="5">5</button>
+      <button class="key" data-key="6">6</button>
+      <button class="key op" data-key="−" aria-label="minus">−</button>
+
+      <button class="key" data-key="1">1</button>
+      <button class="key" data-key="2">2</button>
+      <button class="key" data-key="3">3</button>
+      <button class="key op" data-key="+">+</button>
+
+      <button class="key span-2" data-key="0">0</button>
+      <button class="key" data-key=".">.</button>
+      <button class="key equals" data-key="=" aria-label="equals">=</button>
+    </div>
+
+    <div class="footer">
+      <label class="switch" aria-label="Toggle Dark/Light">
+        <input id="modeToggle" type="checkbox">
+        <div class="toggle"><div class="knob"></div></div>
+        <span id="modeLabel">Dark</span>
+      </label>
+      <div>Offline-ready</div>
+    </div>
+  </div>
+
+  <script>
+    // ----- Theme logic -----
+    const root = document.documentElement;
+    const toggle = document.getElementById('modeToggle');
+    const label = document.getElementById('modeLabel');
+    const themeChip = document.getElementById('themeChip');
+    const storedTheme = localStorage.getItem('theme') || 'dark';
+    function applyTheme(theme){
+      root.classList.toggle('light', theme === 'light');
+      label.textContent = theme === 'light' ? 'Light' : 'Dark';
+      toggle.checked = theme === 'light';
+      localStorage.setItem('theme', theme);
+    }
+    applyTheme(storedTheme);
+    toggle.addEventListener('change', ()=> applyTheme(toggle.checked ? 'light' : 'dark'));
+    themeChip.addEventListener('click', ()=> applyTheme(root.classList.contains('light') ? 'dark' : 'light'));
+
+    // ----- Calculator logic -----
+    const historyEl = document.getElementById('history');
+    const resultEl = document.getElementById('result');
+    const keys = document.getElementById('keys');
+    const clearChip = document.getElementById('clearChip');
+
+    let current = '0';
+    let prev = null;
+    let operator = null;
+    let overwrite = true;
+
+    function formatNumber(n){
+      const [int, dec] = n.split('.');
+      const intFmt = parseFloat(int).toLocaleString(undefined);
+      return dec ? intFmt + '.' + dec : intFmt;
+    }
+
+    function updateDisplay(){
+      resultEl.textContent = formatNumber(current);
+      historyEl.textContent = (prev !== null && operator) ? (formatNumber(prev) + ' ' + operator) : '\u00A0';
+    }
+
+    function compute(){
+      const a = parseFloat(prev);
+      const b = parseFloat(current);
+      if (operator === '+') return (a + b).toString();
+      if (operator === '−') return (a - b).toString();
+      if (operator === '×') return (a * b).toString();
+      if (operator === '÷') return (b === 0 ? 'NaN' : (a / b).toString());
+      return current;
+    }
+
+    function press(key){
+      if (/^\d$/.test(key)) {
+        if (overwrite) { current = key; overwrite = false; }
+        else current = current === '0' ? key : current + key;
+      } else if (key === '.') {
+        if (overwrite) { current = '0.'; overwrite = false; }
+        else if (!current.includes('.')) current += '.';
+      } else if (key === 'C') {
+        current = '0'; overwrite = true;
+      } else if (key === 'AC') {
+        current = '0'; prev = null; operator = null; overwrite = true;
+      } else if (key === '±') {
+        current = (current.startsWith('-') ? current.slice(1) : ('-' + current));
+      } else if (key === '%') {
+        current = (parseFloat(current) / 100).toString();
+      } else if (['+','−','×','÷'].includes(key)) {
+        if (operator && !overwrite) {
+          current = compute();
+        }
+        prev = current;
+        operator = key;
+        overwrite = true;
+      } else if (key === '=') {
+        if (operator) {
+          current = compute();
+          prev = null; operator = null; overwrite = true;
+        }
+      }
+      updateDisplay();
+    }
+
+    // Button clicks
+    keys.addEventListener('click', (e)=>{
+      const btn = e.target.closest('button.key');
+      if (!btn) return;
+      const k = btn.dataset.key;
+      if (k === 'C' && (prev || current !== '0')) { // short clear
+        press('C');
+      } else {
+        press(k);
+      }
+    });
+
+    // Clear chip acts like AC
+    clearChip.addEventListener('click', ()=> press('AC'));
+
+    // Keyboard support
+    const keyMap = {
+      '/':'÷','*':'×','-':'−','+':'+','Enter':'=','=':'=',
+      'Backspace':'C','c':'AC','%':'%','p':'%','.':'.'
+    };
+    window.addEventListener('keydown', (e)=>{
+      let k = e.key;
+      if (keyMap[k]) k = keyMap[k];
+      if (/^\d$/.test(k) || ['÷','×','−','+','=','C','AC','%','.'].includes(k)) {
+        e.preventDefault();
+        press(k);
+      }
+    });
+
+    // Register service worker for offline
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', ()=> {
+        navigator.serviceWorker.register('./service-worker.js');
+      });
+    }
+
+    updateDisplay();
+  </script>
+</body>
+</html>
