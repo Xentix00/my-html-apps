@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>CorePWA | Alive</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <style>
+        :root {
+            /* Light Mode Variables */
+            --bg-grad-1: #F2F2F7;
+            --bg-grad-2: #E5E5EA;
+            --card: rgba(255, 255, 255, 0.8);
+            --text: #000000;
+            --subtext: #8E8E93;
+            --accent: #007AFF;
+            --accent-glow: rgba(0, 122, 255, 0.3);
+            --input-border: #D1D1D6;
+            --input-bg: rgba(255, 255, 255, 0.9);
+            --splash-bg: #FFFFFF;
+            --shadow-sm: 0 4px 15px rgba(0,0,0,0.05);
+            --shadow-md: 0 8px 25px rgba(0,0,0,0.1);
+        }
+
+        [data-theme="dark"] {
+            --bg-grad-1: #000000;
+            --bg-grad-2: #1C1C1E;
+            --card: rgba(28, 28, 30, 0.8);
+            --text: #FFFFFF;
+            --subtext: #98989D;
+            --accent: #0A84FF;
+            --accent-glow: rgba(10, 132, 255, 0.3);
+            --input-border: #38383A;
+            --input-bg: rgba(44, 44, 46, 0.9);
+            --splash-bg: #000000;
+            --shadow-sm: 0 4px 15px rgba(0,0,0,0.2);
+            --shadow-md: 0 8px 25px rgba(0,0,0,0.3);
+        }
+
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+            transition: background-color 0.4s cubic-bezier(0.2, 0.8, 0.2, 1), 
+                        color 0.4s cubic-bezier(0.2, 0.8, 0.2, 1),
+                        border-color 0.4s ease,
+                        box-shadow 0.4s ease,
+                        transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); /* Elastic bounce */
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", sans-serif;
+            /* Animated Gradient Background */
+            background: linear-gradient(135deg, var(--bg-grad-1), var(--bg-grad-2), var(--bg-grad-1));
+            background-size: 200% 200%;
+            animation: ambientMove 15s ease infinite;
+            color: var(--text);
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+            padding-top: env(safe-area-inset-top);
+            padding-bottom: env(safe-area-inset-bottom);
+        }
+
+        @keyframes ambientMove {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* Splash Screen */
+        #splash {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: var(--splash-bg);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            transition: opacity 0.6s ease, visibility 0.6s;
+        }
+
+        #splash.hidden {
+            opacity: 0;
+            visibility: hidden;
+        }
+
+        .splash-logo {
+            width: 120px;
+            /* A more dynamic entrance */
+            animation: splashEntrance 1.2s cubic-bezier(0.2, 1, 0.3, 1) forwards;
+        }
+
+        @keyframes splashEntrance {
+            0% { opacity: 0; transform: scale(0.8) translateY(40px); }
+            100% { opacity: 1; transform: scale(1) translateY(0); }
+        }
+
+        /* Main Interface */
+        .container {
+            width: 100%;
+            max-width: 500px;
+            margin-top: 40px;
+            opacity: 0;
+            transform: translateY(20px) scale(0.98);
+            transition: opacity 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) 0.5s, 
+                        transform 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) 0.5s;
+        }
+
+        .container.visible {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            /* Subtle parallax-like shift on load */
+            animation: headerShift 1s ease-out 0.6s backwards;
+        }
+        @keyframes headerShift { from { transform: translateY(10px); opacity: 0; } to { transform: translateY(0); opacity: 1; }}
+
+        .app-logo-small {
+            width: 60px;
+            margin-bottom: 10px;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
+        }
+
+        h1 { font-size: 24px; font-weight: 700; margin: 0; letter-spacing: -0.5px; }
+        p.subtitle { color: var(--subtext); font-size: 14px; margin-top: 5px; font-weight: 500; }
+
+        /* Dynamic Card Layout */
+        .card {
+            /* Glassmorphism effect */
+            background: var(--card);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: var(--shadow-sm);
+            border: 1px solid rgba(255,255,255,0.1);
+            will-change: transform;
+        }
+
+        /* Card Lift Interaction */
+        .card:hover, .card:active {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .section-title {
+            font-size: 12px; font-weight: 600; color: var(--subtext); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 12px; display: block;
+        }
+
+        .input-group { display: grid; gap: 12px; }
+
+        /* Interactive Inputs */
+        input[type="text"], textarea {
+            width: 100%;
+            background: var(--input-bg);
+            border: 1px solid var(--input-border);
+            border-radius: 10px;
+            padding: 14px;
+            color: var(--text);
+            font-size: 16px;
+            outline: none;
+        }
+
+        input[type="text"]:focus, textarea:focus {
+            border-color: var(--accent);
+            background: var(--card);
+            box-shadow: 0 0 0 4px var(--accent-glow);
+            transform: scale(1.01);
+        }
+
+        textarea {
+            height: 180px;
+            font-family: "SF Mono", "Menlo", monospace;
+            resize: none;
+            font-size: 13px; line-height: 1.5;
+        }
+
+        /* Breathing Upload Zone */
+        .upload-btn {
+            background: var(--input-bg);
+            border: 2px dashed var(--input-border);
+            border-radius: 12px;
+            padding: 24px;
+            text-align: center;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        /* Idle gentle pulse */
+        .upload-btn:not(.has-file):not(.drag-over) {
+             animation: borderPulse 3s ease-in-out infinite;
+        }
+
+        @keyframes borderPulse {
+            0% { border-color: var(--input-border); }
+            50% { border-color: var(--accent); }
+            100% { border-color: var(--input-border); }
+        }
+
+        /* Drag & Drop Highlight State */
+        .upload-btn.drag-over {
+            border-color: var(--accent);
+            background: var(--accent-glow);
+            transform: scale(1.02);
+        }
+
+        .upload-text {
+            color: var(--accent); font-weight: 600; font-size: 15px;
+            display: block; margin-bottom: 4px;
+            transition: transform 0.3s ease;
+        }
+        .upload-btn:hover .upload-text { transform: translateY(-2px); }
+
+        .upload-subtext { font-size: 12px; color: var(--subtext); }
+
+        #previewIcon {
+            width: 80px; height: 80px;
+            border-radius: 18px;
+            margin: 15px auto 0;
+            display: none;
+            object-fit: cover;
+            border: 2px solid var(--bg-grad-1);
+            box-shadow: var(--shadow-sm);
+            /* Pop in animation */
+            animation: iconPop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+        @keyframes iconPop { from { transform: scale(0.5); opacity: 0; } to { transform: scale(1); opacity: 1; }}
+
+        /* Energetic Action Button */
+        .primary-btn {
+            background-color: var(--accent);
+            color: white;
+            border: none;
+            border-radius: 14px;
+            padding: 18px;
+            font-size: 17px; font-weight: 600;
+            width: 100%;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0, 122, 255, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .primary-btn:hover {
+            box-shadow: 0 6px 15px rgba(0, 122, 255, 0.3);
+            transform: translateY(-1px);
+        }
+
+        .primary-btn:active {
+            transform: scale(0.96) translateY(0);
+            box-shadow: 0 2px 5px rgba(0, 122, 255, 0.2);
+            filter: brightness(1.1);
+        }
+
+        /* Theme Toggle */
+        .theme-toggle {
+            position: absolute;
+            top: calc(20px + env(safe-area-inset-top));
+            right: 20px;
+            background: var(--card);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--input-border);
+            padding: 8px 14px;
+            border-radius: 20px;
+            color: var(--text);
+            font-size: 11px; font-weight: 700; letter-spacing: 0.5px;
+            cursor: pointer;
+            box-shadow: var(--shadow-sm);
+            z-index: 10;
+        }
+        .theme-toggle:active { transform: scale(0.92); }
+
+        .hidden-file { display: none; }
+    </style>
+
+    <link rel="manifest" href="manifest.json">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="CorePWA">
+    <link rel="apple-touch-icon" href="icon.png">
+    <script>if('serviceWorker' in navigator){navigator.serviceWorker.register('sw.js');}</script>
+</head>
+<body data-theme="light">
+
+    <button class="theme-toggle" onclick="toggleTheme()">DARK MODE</button>
+
+    <div id="splash">
+        <img id="splashLogo" src="Logos/CorePWALogoLIGHT.png" class="splash-logo" alt="CorePWA Logo">
+    </div>
+
+    <div class="container" id="mainContainer">
+        <header>
+            <img id="headerLogo" src="Logos/CorePWALogoLIGHT.png" class="app-logo-small" alt="CorePWA">
+            <h1>CorePWA</h1>
+            <p class="subtitle">Deploy native-feeling web apps.</p>
+        </header>
+
+        <div class="card">
+            <span class="section-title">Identity</span>
+            <div class="input-group">
+                <input type="text" id="appName" placeholder="App Name (e.g. Health+)" autocomplete="off">
+                <input type="text" id="shortName" placeholder="Home Label (e.g. Health)" autocomplete="off">
+            </div>
+        </div>
+
+        <div class="card">
+            <span class="section-title">App Icon</span>
+            <div class="upload-btn" id="dropZone" onclick="document.getElementById('iconInput').click()">
+                <span class="upload-text">Tap or Drop Image</span>
+                <span class="upload-subtext">We auto-crop to a perfect 192px square.</span>
+                <input type="file" id="iconInput" class="hidden-file" accept="image/*" onchange="processImage(event)">
+                <img id="previewIcon">
+            </div>
+        </div>
+
+        <div class="card">
+            <span class="section-title">Source Code</span>
+            <textarea id="htmlInput" placeholder="Paste your full <html> code here..." spellcheck="false"></textarea>
+        </div>
+
+        <button class="primary-btn" onclick="generatePWA()">Build & Export Bundle</button>
+        
+        <p style="text-align: center; font-size: 12px; color: var(--subtext); margin: 30px 0; opacity: 0.7;">© 2025 CorePWA Engineering</p>
+    </div>
+
+<script>
+    let iconBlob = null;
+
+    // --- Theme Logic ---
+    function toggleTheme() {
+        const body = document.body;
+        const current = body.getAttribute('data-theme');
+        const next = current === 'light' ? 'dark' : 'light';
+        setTheme(next);
+    }
+
+    function setTheme(theme) {
+        document.body.setAttribute('data-theme', theme);
+        const logoPath = theme === 'light' ? 'Logos/CorePWALogoLIGHT.png' : 'Logos/CorePWALogoDARK.png';
+        document.getElementById('splashLogo').src = logoPath;
+        document.getElementById('headerLogo').src = logoPath;
+        document.querySelector('.theme-toggle').innerText = theme === 'light' ? 'DARK MODE' : 'LIGHT MODE';
+        // Update theme color for native browser UI
+        let metaThemeColor = document.querySelector("meta[name=theme-color]");
+        if (!metaThemeColor) {
+            metaThemeColor = document.createElement("meta");
+            metaThemeColor.name = "theme-color";
+            document.head.appendChild(metaThemeColor);
+        }
+        metaThemeColor.content = theme === 'light' ? '#F2F2F7' : '#000000';
+    }
+
+    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        setTheme('dark');
+    } else {
+        setTheme('light');
+    }
+
+    // --- Splash Sequence ---
+    window.addEventListener('load', () => {
+        setTimeout(() => {
+            document.getElementById('splash').classList.add('hidden');
+            document.getElementById('mainContainer').classList.add('visible');
+        }, 2000);
+    });
+
+    // --- Drag & Drop Logic ---
+    const dropZone = document.getElementById('dropZone');
+    ;['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+        dropZone.addEventListener(eventName, preventDefaults, false);
+    });
+    function preventDefaults(e) { e.preventDefault(); e.stopPropagation(); }
+    
+    ['dragenter', 'dragover'].forEach(eventName => {
+        dropZone.addEventListener(eventName, highlight, false);
+    });
+    ['dragleave', 'drop'].forEach(eventName => {
+        dropZone.addEventListener(eventName, unhighlight, false);
+    });
+    function highlight(e) { dropZone.classList.add('drag-over'); }
+    function unhighlight(e) { dropZone.classList.remove('drag-over'); }
+
+    dropZone.addEventListener('drop', handleDrop, false);
+    function handleDrop(e) {
+        let dt = e.dataTransfer;
+        let files = dt.files;
+        if(files.length > 0 && files[0].type.startsWith('image/')) {
+            document.getElementById('iconInput').files = files;
+            processFile(files[0]);
+        }
+    }
+
+    // --- Image Processing ---
+    function processImage(event) {
+        const file = event.target.files[0];
+        if (file) processFile(file);
+    }
+
+    function processFile(file) {
+        // Mark as having file to stop padding animation
+        dropZone.classList.add('has-file');
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const img = new Image();
+            img.onload = function() {
+                const canvas = document.createElement('canvas');
+                canvas.width = 192; canvas.height = 192;
+                const ctx = canvas.getContext('2d');
+
+                let sX = 0, sY = 0, sSize = Math.min(img.width, img.height);
+                sX = (img.width - sSize) / 2;
+                sY = (img.height - sSize) / 2;
+
+                ctx.imageSmoothingEnabled = true;
+                ctx.imageSmoothingQuality = 'high';
+                ctx.drawImage(img, sX, sY, sSize, sSize, 0, 0, 192, 192);
+                
+                const preview = document.getElementById('previewIcon');
+                preview.src = canvas.toDataURL('image/png');
+                preview.style.display = 'block';
+                canvas.toBlob(blob => { iconBlob = blob; }, 'image/png');
+            };
+            img.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+    }
+
+    // --- Generator Logic ---
+    async function generatePWA() {
+        const btn = document.querySelector('.primary-btn');
+        const originalText = btn.innerText;
+        
+        const htmlCode = document.getElementById('htmlInput').value;
+        const name = document.getElementById('appName').value || "CorePWA App";
+        const short = document.getElementById('shortName').value || "App";
+
+        if (!htmlCode.includes('<head>') || !iconBlob) {
+            // Shake animation for error
+            btn.style.animation = 'shake 0.4s cubic-bezier(.36,.07,.19,.97) both';
+            setTimeout(() => { btn.style.animation = ''; }, 400);
+            alert("Missing Requirements:\nPlease ensure you have pasted HTML with a <head> tag and uploaded an app icon.");
+            return;
+        }
+
+        // Success state animation
+        btn.innerText = "Building Bundle...";
+        btn.style.opacity = "0.8";
+        
+        setTimeout(async () => {
+            const zip = new JSZip();
+            const manifest = {
+                "name": name, "short_name": short, "start_url": "index.html",
+                "display": "standalone", "background_color": "#FFFFFF", "theme_color": "#FFFFFF",
+                "icons": [{ "src": "icon.png", "sizes": "192x192", "type": "image/png" }]
+            };
+
+            const sw = `self.addEventListener('install', e => self.skipWaiting());\nself.addEventListener('fetch', e => e.respondWith(fetch(e.request)));`;
+            const tags = `\n    \n    <link rel="manifest" href="manifest.json">\n    <meta name="apple-mobile-web-app-capable" content="yes">\n    <meta name="apple-mobile-web-app-status-bar-style" content="default">\n    <meta name="apple-mobile-web-app-title" content="${short}">\n    <link rel="apple-touch-icon" href="icon.png">\n    <script>if('serviceWorker' in navigator){navigator.serviceWorker.register('sw.js');}<\/script>`;
+
+            zip.file("index.html", htmlCode.replace('</head>', tags + '\n</head>'));
+            zip.file("manifest.json", JSON.stringify(manifest, null, 2));
+            zip.file("sw.js", sw);
+            zip.file("icon.png", iconBlob);
+
+            const blob = await zip.generateAsync({type:"blob"});
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = "corepwa-bundle.zip";
+            link.click();
+
+            // Reset button state
+            btn.innerText = originalText;
+            btn.style.opacity = "1";
+        }, 800); // Artificial delay for effect
+    }
+</script>
+<style>
+    /* Error Shake Animation */
+    @keyframes shake {
+        10%, 90% { transform: translate3d(-1px, 0, 0); }
+        20%, 80% { transform: translate3d(2px, 0, 0); }
+        30%, 50%, 70% { transform: translate3d(-3px, 0, 0); }
+        40%, 60% { transform: translate3d(3px, 0, 0); }
+    }
+</style>
+</body>
+</html>
