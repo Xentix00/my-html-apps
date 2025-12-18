@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart PWA Maker</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <style>
+        body { font-family: -apple-system, system-ui, sans-serif; line-height: 1.6; max-width: 800px; margin: 40px auto; padding: 20px; background: #f9f9f9; color: #333; }
+        .box { background: white; padding: 30px; border-radius: 15px; box-shadow: 0 5px 25px rgba(0,0,0,0.1); }
+        h2 { color: #007aff; margin-top: 0; }
+        .input-row { display: flex; gap: 10px; margin-bottom: 20px; }
+        input[type="text"] { flex: 1; padding: 12px; border: 1px solid #ddd; border-radius: 8px; }
+        .upload-area { border: 2px dashed #007aff; padding: 20px; text-align: center; border-radius: 10px; background: #f0f7ff; margin-bottom: 20px; }
+        textarea { width: 100%; height: 200px; padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-family: monospace; box-sizing: border-box; }
+        button { background: #007aff; color: white; border: none; padding: 15px; border-radius: 8px; font-weight: bold; width: 100%; cursor: pointer; font-size: 16px; margin-top: 15px; }
+        button:hover { background: #0056b3; }
+        #previewIcon { width: 100px; height: 100px; border-radius: 20px; display: none; margin: 15px auto; object-fit: cover; border: 3px solid white; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        .tip { font-size: 0.85em; color: #666; margin-top: 10px; font-style: italic; }
+    </style>
+
+    <link rel="manifest" href="manifest.json">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="CorePWA">
+    <link rel="apple-touch-icon" href="icon.png">
+    <script>if('serviceWorker' in navigator){navigator.serviceWorker.register('sw.js');}</script>
+</head>
+<body>
+
+<div class="box">
+    <h2>Smart PWA Generator</h2>
+    <p>This version automatically <b>center-crops</b> your image so it never looks squished.</p>
+
+    <div class="input-row">
+        <input type="text" id="appName" placeholder="Full App Name">
+        <input type="text" id="shortName" placeholder="Home Screen Label">
+    </div>
+
+    <div class="upload-area">
+        <strong>Step 1: Upload Icon</strong><br>
+        <input type="file" id="iconInput" accept="image/*" onchange="processImage(event)">
+        <img id="previewIcon">
+        <div class="tip">Note: We'll center-crop your image to a square for you.</div>
+    </div>
+
+    <strong>Step 2: Paste HTML</strong>
+    <textarea id="htmlInput" placeholder="<html>...</html>"></textarea>
+
+    <button onclick="generatePWA()">Build & Download ZIP</button>
+</div>
+
+<script>
+let iconBlob = null;
+
+function processImage(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        const img = new Image();
+        img.onload = function() {
+            const canvas = document.createElement('canvas');
+            canvas.width = 192;
+            canvas.height = 192;
+            const ctx = canvas.getContext('2d');
+
+            // --- SMART CROP LOGIC ---
+            let sourceX = 0;
+            let sourceY = 0;
+            let sourceWidth = img.width;
+            let sourceHeight = img.height;
+
+            if (img.width > img.height) {
+                // Landscape: Crop sides
+                sourceWidth = img.height;
+                sourceX = (img.width - img.height) / 2;
+            } else if (img.height > img.width) {
+                // Portrait: Crop top/bottom
+                sourceHeight = img.width;
+                sourceY = (img.height - img.width) / 2;
+            }
+
+            ctx.imageSmoothingEnabled = true;
+            ctx.imageSmoothingQuality = 'high';
+            
+            // DrawImage(image, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight)
+            ctx.drawImage(img, sourceX, sourceY, sourceWidth, sourceHeight, 0, 0, 192, 192);
+            
+            const preview = document.getElementById('previewIcon');
+            preview.src = canvas.toDataURL('image/png');
+            preview.style.display = 'block';
+            
+            canvas.toBlob(blob => { iconBlob = blob; }, 'image/png');
+        };
+        img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+}
+
+async function generatePWA() {
+    const htmlCode = document.getElementById('htmlInput').value;
+    const name = document.getElementById('appName').value || "My PWA";
+    const short = document.getElementById('shortName').value || "PWA";
+
+    if (!htmlCode.includes('<head>') || !iconBlob) {
+        alert("Please ensure you have pasted HTML with a <head> tag and uploaded an image.");
+        return;
+    }
+
+    const zip = new JSZip();
+    const manifest = {
+        "name": name, "short_name": short, "start_url": "index.html",
+        "display": "standalone", "background_color": "#ffffff", "theme_color": "#ffffff",
+        "icons": [{ "src": "icon.png", "sizes": "192x192", "type": "image/png" }]
+    };
+
+    const sw = `self.addEventListener('install', e => self.skipWaiting());
+self.addEventListener('fetch', e => e.respondWith(fetch(e.request)));`;
+
+    const tags = `
+    <link rel="manifest" href="manifest.json">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="${short}">
+    <link rel="apple-touch-icon" href="icon.png">
+    <script>if('serviceWorker' in navigator){navigator.serviceWorker.register('sw.js');}<\/script>`;
+
+    zip.file("index.html", htmlCode.replace('</head>', tags + '\n</head>'));
+    zip.file("manifest.json", JSON.stringify(manifest, null, 2));
+    zip.file("sw.js", sw);
+    zip.file("icon.png", iconBlob);
+
+    const blob = await zip.generateAsync({type:"blob"});
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = "pwa-project.zip";
+    link.click();
+}
+</script>
+</body>
+</html>
