@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Earth Cinematic Intro</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Montserrat:wght@300;400&display=swap');
+
+        body {
+            margin: 0;
+            overflow: hidden;
+            background-color: #000;
+            font-family: 'Montserrat', sans-serif;
+        }
+
+        #canvas-container {
+            width: 100vw;
+            height: 100vh;
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 1;
+        }
+
+        /* UI Layer */
+        #ui-layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 2;
+            pointer-events: none;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            perspective: 1000px;
+        }
+
+        /* Dynamic Text Container */
+        #dynamic-text {
+            text-align: center;
+            color: white;
+            text-transform: uppercase;
+            opacity: 0;
+            transform: translateZ(-50px);
+            transition: opacity 1s ease-out, transform 4s ease-out, filter 1s ease;
+            will-change: opacity, transform, filter;
+        }
+
+        #dynamic-text.visible {
+            opacity: 1;
+            transform: translateZ(0);
+            filter: blur(0px);
+        }
+
+        #dynamic-text.hidden {
+            opacity: 0;
+            transform: translateZ(50px); /* Fly towards screen on exit */
+            filter: blur(10px);
+        }
+
+        /* Styles for different text types */
+        .style-narrative {
+            font-size: 1.5rem;
+            letter-spacing: 0.5rem;
+            font-weight: 300;
+            color: #aaddff;
+            text-shadow: 0 0 10px rgba(0,0,0,0.5);
+        }
+
+        .style-impact {
+            font-size: 3rem;
+            letter-spacing: 0.8rem;
+            font-weight: 700;
+            color: #ffffff;
+        }
+
+        .style-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 6rem;
+            font-weight: 900;
+            letter-spacing: 1.5rem;
+            color: #fff;
+            text-shadow: 0 0 50px rgba(64, 156, 255, 0.8);
+            mix-blend-mode: overlay;
+        }
+        
+        .sub-title {
+            display: block;
+            font-family: 'Montserrat', sans-serif;
+            font-size: 1rem;
+            font-weight: 400;
+            letter-spacing: 5px;
+            margin-top: 20px;
+            opacity: 0.7;
+            text-shadow: none;
+        }
+
+        /* Loading overlay */
+        #loader {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #666;
+            font-size: 0.8rem;
+            letter-spacing: 2px;
+            z-index: 10;
+            transition: opacity 0.5s;
+        }
+
+        @media (max-width: 768px) {
+            .style-narrative { font-size: 1rem; letter-spacing: 0.3rem; }
+            .style-impact { font-size: 1.5rem; }
+            .style-title { font-size: 3rem; letter-spacing: 0.5rem; }
+        }
+    </style>
+
+    <link rel="manifest" href="manifest.json">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Earth">
+    <link rel="apple-touch-icon" href="icon.png">
+    <script>
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('sw.js');
+      }
+    </script>
+</head>
+<body>
+
+    <div id="loader">LOADING ASSETS...</div>
+    <div id="canvas-container"></div>
+    <div id="ui-layer">
+        <div id="dynamic-text"></div>
+    </div>
+
+    <!-- Three.js Import -->
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://unpkg.com/three@0.160.0/build/three.module.js"
+            }
+        }
+    </script>
+
+    <script type="module">
+        import * as THREE from 'three';
+
+        // --- SCENE SETUP ---
+        const scene = new THREE.Scene();
+        // Slight fog for depth
+        scene.fog = new THREE.FogExp2(0x000000, 0.02);
+
+        const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+        
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2)); // Cap pixel ratio for performance
+        renderer.toneMapping = THREE.ACESFilmicToneMapping;
+        renderer.outputColorSpace = THREE.SRGBColorSpace;
+        document.getElementById('canvas-container').appendChild(renderer.domElement);
+
+        // --- ASSETS & OBJECTS ---
+        const textureLoader = new THREE.TextureLoader();
+        const earthGroup = new THREE.Group();
+        scene.add(earthGroup);
+
+        // 1. Earth
+        const earthGeo = new THREE.SphereGeometry(3, 64, 64);
+        const earthMat = new THREE.MeshPhongMaterial({
+            map: textureLoader.load('https://unpkg.com/three-globe/example/img/earth-blue-marble.jpg'),
+            bumpMap: textureLoader.load('https://unpkg.com/three-globe/example/img/earth-topology.png'),
+            bumpScale: 0.05,
+            specularMap: textureLoader.load('https://unpkg.com/three-globe/example/img/earth-water.png'),
+            specular: new THREE.Color('grey'),
+            shininess: 5
+        });
+        const earth = new THREE.Mesh(earthGeo, earthMat);
+        earthGroup.add(earth);
+
+        // 2. Clouds
+        const cloudGeo = new THREE.SphereGeometry(3.04, 64, 64);
+        const cloudMat = new THREE.MeshPhongMaterial({
+            map: textureLoader.load('https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/planets/earth_clouds_1024.png'),
+            transparent: true,
+            opacity: 0.8,
+            blending: THREE.AdditiveBlending,
+            side: THREE.DoubleSide
+        });
+        const clouds = new THREE.Mesh(cloudGeo, cloudMat);
+        earthGroup.add(clouds);
+
+        // 3. Atmosphere Glow (Shader)
+        const vertexShader = `
+            varying vec3 vNormal;
+            void main() {
+                vNormal = normalize(normalMatrix * normal);
+                gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+            }
+        `;
+        const fragmentShader = `
+            varying vec3 vNormal;
+            void main() {
+                float intensity = pow(0.65 - dot(vNormal, vec3(0, 0, 1.0)), 4.0);
+                gl_FragColor = vec4(0.3, 0.6, 1.0, 1.0) * intensity * 1.8;
+            }
+        `;
+        const atmosGeo = new THREE.SphereGeometry(3.25, 64, 64);
+        const atmosMat = new THREE.ShaderMaterial({
+            vertexShader: vertexShader,
+            fragmentShader: fragmentShader,
+            blending: THREE.AdditiveBlending,
+            side: THREE.BackSide,
+            transparent: true
+        });
+        const atmosphere = new THREE.Mesh(atmosGeo, atmosMat);
+        scene.add(atmosphere);
+
+        // 4. Stars
+        const starGeo = new THREE.BufferGeometry();
+        const starCount = 4000;
+        const posArray = new Float32Array(starCount * 3);
+        for(let i = 0; i < starCount * 3; i++) posArray[i] = (Math.random() - 0.5) * 120;
+        starGeo.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
+        const starMat = new THREE.PointsMaterial({ size: 0.08, color: 0xffffff, transparent: true, opacity: 0.8 });
+        const stars = new THREE.Points(starGeo, starMat);
+        scene.add(stars);
+
+        // --- LIGHTING ---
+        const ambientLight = new THREE.AmbientLight(0x111111);
+        scene.add(ambientLight);
+
+        const sunLight = new THREE.DirectionalLight(0xffffff, 1.8);
+        sunLight.position.set(5, 3, 5);
+        scene.add(sunLight);
+
+        // Backlight for dramatic edge effect
+        const backLight = new THREE.SpotLight(0x0044ff, 2, 0, 0.5, 1);
+        backLight.position.set(-5, 0, -5);
+        backLight.lookAt(0,0,0);
+        scene.add(backLight);
+
+
+        // --- CINEMATIC SEQUENCE ENGINE ---
+
+        // Variables for Smooth Drift
+        let targetCameraPos = new THREE.Vector3(0, 0, 15);
+        let baseCameraPos = new THREE.Vector3(0, 0, 15); // The position we cut TO
+        let driftSpeed = { x: 0, y: 0, z: 0 };
+        
+        // Define the Sequence
+        // x,y,z: Camera position for the cut
+        // drift: How the camera moves during the shot
+        const timeline = [
+            {
+                text: "In the vast cosmic arena",
+                style: "style-narrative",
+                duration: 4000,
+                cam: { x: 0, y: 10, z: 20 }, // High angle, far
+                drift: { x: 0, y: -0.05, z: -0.5 } // Pan down and zoom in fast
+            },
+            {
+                text: "Floating in silence",
+                style: "style-narrative",
+                duration: 4000,
+                cam: { x: -12, y: -5, z: 8 }, // Side angle, low
+                drift: { x: 0.5, y: 0, z: -0.2 } // Pan right
+            },
+            {
+                text: "A fragile shield",
+                style: "style-impact",
+                duration: 3500,
+                cam: { x: 6, y: 4, z: 4.5 }, // Close up (Atmosphere focus)
+                drift: { x: -0.1, y: 0.1, z: 0.05 } // Subtle movement
+            },
+            {
+                text: "Teeming with life",
+                style: "style-impact",
+                duration: 3500,
+                cam: { x: -3, y: 6, z: 6 }, // Top down-ish
+                drift: { x: 0.1, y: -0.2, z: -0.1 }
+            },
+            {
+                text: "Home.",
+                style: "style-narrative",
+                duration: 3000,
+                cam: { x: 0, y: 0, z: 12 }, // Reset to center, mid distance
+                drift: { x: 0, y: 0, z: -2.0 } // Fast zoom in
+            },
+            {
+                text: "EARTH<span class='sub-title'>SECTOR 001</span>",
+                style: "style-title",
+                duration: 999999, // Stay here
+                cam: { x: 0, y: 0, z: 9 }, // Perfect framing
+                drift: { x: 0, y: 0, z: 0 } // No auto drift, mouse control takes over
+            }
+        ];
+
+        const textEl = document.getElementById('dynamic-text');
+        
+        function wait(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+
+        async function runSequence() {
+            for (let shot of timeline) {
+                
+                // 1. CUT CAMERA (Instant Move)
+                camera.position.set(shot.cam.x, shot.cam.y, shot.cam.z);
+                camera.lookAt(0, 0, 0);
+                
+                // Store base for drifting logic in animate loop
+                baseCameraPos.set(shot.cam.x, shot.cam.y, shot.cam.z);
+                driftSpeed = shot.drift;
+
+                // 2. UPDATE TEXT
+                textEl.className = ""; // clear classes
+                textEl.innerHTML = shot.text;
+                textEl.classList.add(shot.style);
+                
+                // Trigger Entrance
+                textEl.classList.remove('hidden');
+                textEl.classList.add('visible');
+
+                // 3. WAIT (Scene Duration minus transition time)
+                // We subtract a bit to start the exit animation before the cut
+                const exitTime = 1000; 
+                let holdTime = shot.duration - exitTime;
+                if(holdTime < 0) holdTime = 0;
+
+                await wait(holdTime);
+
+                // 4. EXIT TEXT (unless it's the final slide)
+                if (shot.duration < 100000) {
+                    textEl.classList.remove('visible');
+                    textEl.classList.add('hidden');
+                    await wait(exitTime);
+                }
+            }
+        }
+
+        // --- ANIMATION LOOP ---
+        const clock = new THREE.Clock();
+        const mouse = { x: 0, y: 0 };
+
+        function animate() {
+            requestAnimationFrame(animate);
+            const delta = clock.getDelta();
+            const elapsedTime = clock.getElapsedTime();
+
+            // Object Rotation
+            earth.rotation.y += 0.001;
+            clouds.rotation.y += 0.0013;
+            clouds.rotation.x = Math.sin(elapsedTime * 0.1) * 0.05; // Gentle cloud wobble
+
+            // Starfield slow rotation
+            stars.rotation.y -= 0.0002;
+
+            // CAMERA DRIFT LOGIC
+            // Apply the programmed drift to the base position
+            baseCameraPos.x += driftSpeed.x * delta;
+            baseCameraPos.y += driftSpeed.y * delta;
+            baseCameraPos.z += driftSpeed.z * delta;
+
+            // Apply Mouse Parallax (add to base position)
+            // Note: We interpolate current camera pos towards base + mouse
+            const parallaxX = mouse.x * 0.5;
+            const parallaxY = mouse.y * 0.5;
+
+            camera.position.x += (baseCameraPos.x + parallaxX - camera.position.x) * 0.1;
+            camera.position.y += (baseCameraPos.y + parallaxY - camera.position.y) * 0.1;
+            camera.position.z += (baseCameraPos.z - camera.position.z) * 0.1;
+
+            camera.lookAt(0, 0, 0); // Always focus on Earth
+
+            renderer.render(scene, camera);
+        }
+
+        // --- EVENTS ---
+        THREE.DefaultLoadingManager.onLoad = function ( ) {
+            const loader = document.getElementById('loader');
+            loader.style.opacity = '0';
+            setTimeout(() => {
+                loader.style.display = 'none';
+                runSequence(); // Start the movie
+            }, 500);
+        };
+
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        document.addEventListener('mousemove', (event) => {
+            mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+            mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+        });
+
+        animate();
+
+    </script>
+</body>
+</html>
