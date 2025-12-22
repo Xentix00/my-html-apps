@@ -1,0 +1,808 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Covenant</title>
+    <style>
+        /* --- CSS VARIABLES & RESET --- */
+        :root {
+            --bg-color: #000000;
+            --text-color: #ffffff;
+            --accent-color: #ff3333; /* For countdown only */
+            --glass-bg: rgba(255, 255, 255, 0.05);
+            --glass-border: 1px solid rgba(255, 255, 255, 0.15);
+            --glass-highlight: rgba(255, 255, 255, 0.2);
+            --font-main: 'Courier New', Courier, monospace; /* Tech/Mono aesthetic */
+            --glow-width: 2px;
+            --transition-speed: 0.5s;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: var(--font-main);
+            height: 100vh;
+            height: 100dvh; /* Mobile viewport fix */
+            width: 100vw;
+            overflow: hidden;
+            overscroll-behavior: none; /* Prevent iOS scroll bounce */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* --- LAYOUT & CONTAINERS --- */
+        #app-container {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* --- GLOWING EDGES ANIMATION --- */
+        #edge-glow {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            pointer-events: none;
+            z-index: 100;
+            box-shadow: inset 0 0 20px rgba(255, 255, 255, 0.1);
+            animation: pulse-edge 4s infinite ease-in-out;
+            border: 1px solid transparent;
+            transition: opacity 0.5s ease; /* Added for smooth fade-out */
+        }
+
+        /* New class to disable glow effect */
+        #edge-glow.inactive {
+            opacity: 0;
+            box-shadow: none !important;
+            animation: none !important;
+        }
+
+        @keyframes pulse-edge {
+            0% { box-shadow: inset 0 0 10px rgba(255, 255, 255, 0); border-color: rgba(255,255,255,0.1); }
+            50% { box-shadow: inset 0 0 30px rgba(255, 255, 255, 0.4); border-color: rgba(255,255,255, 0.6); }
+            100% { box-shadow: inset 0 0 10px rgba(255, 255, 255, 0); border-color: rgba(255,255,255,0.1); }
+        }
+
+        /* --- VIEW MANAGEMENT --- */
+        .view {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity var(--transition-speed) ease;
+            z-index: 1;
+        }
+
+        .view.active {
+            opacity: 1;
+            pointer-events: all;
+            z-index: 10;
+        }
+
+        /* --- SPLASH SCREEN --- */
+        #splash-screen {
+            z-index: 50;
+            background-color: var(--bg-color);
+        }
+
+        .logo-container {
+            text-align: center;
+        }
+
+        .logo-icon {
+            width: 80px;
+            height: 80px;
+            border: 2px solid white;
+            border-radius: 50%;
+            margin-bottom: 20px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.5);
+            animation: fade-in 1.5s ease forwards;
+            opacity: 0;
+        }
+
+        .app-name {
+            font-size: 2rem;
+            letter-spacing: 0.5rem;
+            text-transform: uppercase;
+            animation: fade-in 1.5s ease forwards 0.8s; /* Delay text */
+            opacity: 0;
+        }
+
+        @keyframes fade-in {
+            to { opacity: 1; }
+        }
+
+        /* --- MAIN MENU --- */
+        #main-menu {
+            justify-content: space-between;
+            padding: 40px 20px;
+            padding-top: max(40px, env(safe-area-inset-top)); /* Notch safety */
+            padding-bottom: max(40px, env(safe-area-inset-bottom)); /* Home bar safety */
+        }
+
+        .menu-top {
+            width: 100%;
+            display: flex;
+            justify-content: flex-start;
+        }
+
+        .settings-btn {
+            background: var(--glass-bg);
+            border: var(--glass-border);
+            color: white;
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            backdrop-filter: blur(5px);
+            transition: all 0.3s;
+        }
+
+        .settings-btn:hover {
+            background: var(--glass-highlight);
+            box-shadow: 0 0 10px rgba(255,255,255,0.3);
+        }
+
+        .menu-center {
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            width: 100%; /* Ensure full width for centering */
+        }
+
+        .real-time {
+            font-size: clamp(2.5rem, 13vw, 5rem); /* Responsive font sizing */
+            font-weight: bold;
+            letter-spacing: 2px;
+            text-shadow: 0 0 10px rgba(255,255,255,0.3);
+            white-space: nowrap; /* Prevent wrapping */
+        }
+
+        .countdown-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .countdown-label {
+            font-size: 0.8rem;
+            opacity: 0.7;
+            text-transform: uppercase;
+        }
+
+        .countdown-timer {
+            font-size: 1.5rem;
+            color: var(--accent-color);
+            font-weight: bold;
+            font-family: monospace;
+            text-shadow: 0 0 8px rgba(255, 51, 51, 0.6);
+        }
+
+        .debug-btn {
+            margin-top: 30px;
+            padding: 10px 20px;
+            background: transparent;
+            border: 1px solid #333;
+            color: #666;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        .debug-btn:hover {
+            border-color: white;
+            color: white;
+        }
+
+        /* --- SETTINGS MODAL (Overlay) --- */
+        #settings-modal {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.6);
+            backdrop-filter: blur(8px);
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s;
+        }
+
+        #settings-modal.open {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .glass-panel {
+            width: 90%;
+            max-width: 400px;
+            background: rgba(20, 20, 20, 0.85);
+            border: var(--glass-border);
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+        }
+
+        .panel-header {
+            font-size: 1.5rem;
+            margin-bottom: 25px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            padding-bottom: 10px;
+        }
+
+        .setting-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        /* Custom Toggle */
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 24px;
+        }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: #333;
+            transition: .4s;
+            border-radius: 24px;
+            border: 1px solid #555;
+        }
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 16px;
+            width: 16px;
+            left: 4px;
+            bottom: 3px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        input:checked + .slider { background-color: white; }
+        input:checked + .slider:before { transform: translateX(26px); background-color: black; }
+
+        /* Range Slider */
+        input[type=range] {
+            -webkit-appearance: none;
+            width: 50%;
+            background: transparent;
+        }
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 16px;
+            width: 16px;
+            border-radius: 50%;
+            background: #ffffff;
+            cursor: pointer;
+            margin-top: -6px;
+        }
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 4px;
+            background: #333;
+            border-radius: 2px;
+        }
+
+        .modal-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 15px;
+            margin-top: 30px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            cursor: pointer;
+            font-family: inherit;
+            font-weight: bold;
+            border-radius: 4px;
+            transition: 0.2s;
+        }
+
+        .btn-secondary {
+            background: transparent;
+            border: 1px solid #555;
+            color: #aaa;
+        }
+        .btn-secondary:hover { border-color: white; color: white; }
+
+        .btn-primary {
+            background: white;
+            border: 1px solid white;
+            color: black;
+        }
+        .btn-primary:hover {
+            background: #ddd;
+        }
+
+        /* --- TASKS VIEW --- */
+        #task-view {
+            justify-content: space-between;
+            padding: 40px 20px;
+            padding-top: max(40px, env(safe-area-inset-top));
+            padding-bottom: max(60px, env(safe-area-inset-bottom));
+        }
+
+        .task-header {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .task-label {
+            font-size: 0.9rem;
+            color: #888;
+            margin-bottom: 5px;
+            text-transform: uppercase;
+        }
+
+        .current-task-name {
+            font-size: 2rem;
+            font-weight: bold;
+            text-shadow: 0 0 10px rgba(255,255,255,0.2);
+            padding: 0 10px; /* Safety padding */
+        }
+
+        .timer-container {
+            position: relative;
+            width: 75vmin; /* Responsive to screen width/height */
+            height: 75vmin;
+            max-width: 350px;
+            max-height: 350px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* SVG Circle Logic */
+        .progress-ring {
+            width: 100%;
+            height: 100%;
+            transform: rotate(0deg); /* Reset, handled by circle */
+        }
+
+        .progress-ring__circle {
+            transition: 1s linear; /* Smooth transition for 1s ticks */
+            transform: rotate(-90deg);
+            transform-origin: 50% 50%;
+            stroke: white;
+            stroke-width: 4;
+            fill: transparent;
+            filter: drop-shadow(0 0 5px rgba(255,255,255,0.6));
+        }
+        
+        .progress-ring__bg {
+            stroke: #222;
+            stroke-width: 4;
+            fill: transparent;
+        }
+
+        .timer-text {
+            position: absolute;
+            font-size: clamp(2rem, 10vw, 4rem); /* Responsive timer text */
+            font-weight: bold;
+            letter-spacing: 2px;
+        }
+
+        .controls {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 20px; /* Reduced for better fit on small screens */
+        }
+
+        .control-btn {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: var(--glass-bg);
+            border: var(--glass-border);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            backdrop-filter: blur(5px);
+            transition: 0.2s;
+        }
+
+        .control-btn:hover {
+            background: var(--glass-highlight);
+            transform: scale(1.05);
+        }
+
+        .control-btn svg {
+            width: 24px;
+            height: 24px;
+            fill: white;
+        }
+
+    </style>
+
+    
+    <link rel="manifest" href="manifest.json">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Covenant">
+    <link rel="apple-touch-icon" href="icon.png">
+    <script>if('serviceWorker' in navigator){navigator.serviceWorker.register('sw.js');}</script>
+</head>
+<body>
+
+    <div id="app-container">
+        <!-- Decoration -->
+        <div id="edge-glow"></div>
+
+        <!-- 1. SPLASH SCREEN -->
+        <section id="splash-screen" class="view active">
+            <div class="logo-container">
+                <div class="logo-icon">
+                    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+                    </svg>
+                </div>
+                <div class="app-name">Covenant</div>
+            </div>
+        </section>
+
+        <!-- 2. MAIN MENU -->
+        <section id="main-menu" class="view">
+            <div class="menu-top">
+                <button class="settings-btn" id="btn-open-settings">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="3"></circle>
+                        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+                    </svg>
+                </button>
+            </div>
+
+            <div class="menu-center">
+                <div class="real-time" id="clock-display">00:00:00</div>
+                <div class="countdown-container">
+                    <span class="countdown-label">Sequence Initiation In</span>
+                    <span class="countdown-timer" id="countdown-display">--:--:--</span>
+                </div>
+                <!-- Debug/Test Button -->
+                <button class="debug-btn" id="btn-debug-start">DEBUG: Start Routine Now</button>
+            </div>
+
+            <div style="height: 44px;"></div> <!-- Spacer -->
+        </section>
+
+        <!-- 3. TASKS VIEW -->
+        <section id="task-view" class="view">
+            <div class="task-header">
+                <div class="task-label">Current Task</div>
+                <div class="current-task-name" id="task-name">Initializing...</div>
+            </div>
+
+            <div class="timer-container">
+                <svg class="progress-ring" viewBox="0 0 280 280"> <!-- Added viewBox for scaling -->
+                    <circle class="progress-ring__bg" stroke="rgba(255,255,255,0.1)" stroke-width="4" fill="transparent" r="120" cx="140" cy="140"/>
+                    <circle class="progress-ring__circle" id="progress-circle" stroke="white" stroke-width="6" fill="transparent" r="120" cx="140" cy="140"/>
+                </svg>
+                <div class="timer-text" id="task-timer">00:00</div>
+            </div>
+
+            <div class="controls">
+                <!-- Back -->
+                <button class="control-btn" id="btn-back">
+                    <svg viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </button>
+                <!-- Pause/Play -->
+                <button class="control-btn" id="btn-pause">
+                    <svg id="icon-pause" viewBox="0 0 24 24"><path d="M6 4h4v16H6zm8 0h4v16h-4z" stroke="none" fill="currentColor"/></svg>
+                    <svg id="icon-play" viewBox="0 0 24 24" style="display:none;"><path d="M5 3l14 9-14 9V3z" stroke="none" fill="currentColor"/></svg>
+                </button>
+                <!-- Skip -->
+                <button class="control-btn" id="btn-skip">
+                    <svg viewBox="0 0 24 24"><path d="M5 4l10 8-10 8V4zm10 0v16h4V4h-4z" stroke="none" fill="currentColor"/></svg>
+                </button>
+            </div>
+        </section>
+
+        <!-- 4. SETTINGS MODAL -->
+        <div id="settings-modal">
+            <div class="glass-panel">
+                <div class="panel-header">Settings</div>
+                
+                <div class="setting-row">
+                    <span>Haptic Feedback</span>
+                    <label class="switch">
+                        <input type="checkbox" class="setting-input">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+                
+                <div class="setting-row">
+                    <span>Notifications</span>
+                    <label class="switch">
+                        <input type="checkbox" class="setting-input" checked>
+                        <span class="slider"></span>
+                    </label>
+                </div>
+
+                <div class="setting-row">
+                    <span>Volume</span>
+                    <input type="range" min="0" max="100" value="50" class="setting-input">
+                </div>
+
+                <div class="modal-actions">
+                    <button class="btn btn-secondary" id="btn-close-settings">Close</button>
+                    <button class="btn btn-primary" id="btn-save-settings">Save</button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        /* --- STATE MANAGEMENT --- */
+        const state = {
+            view: 'splash', // splash, menu, tasks
+            settingsDirty: false,
+            tasks: [
+                { name: 'Morning Meditation', duration: 10 }, // 10 seconds for demo
+                { name: 'Hydration', duration: 5 },
+                { name: 'Deep Work', duration: 15 },
+                { name: 'Stretch', duration: 10 }
+            ],
+            currentTaskIndex: 0,
+            timerInterval: null,
+            timeRemaining: 0,
+            isPaused: false
+        };
+
+        /* --- DOM ELEMENTS --- */
+        const els = {
+            splash: document.getElementById('splash-screen'),
+            menu: document.getElementById('main-menu'),
+            tasks: document.getElementById('task-view'),
+            settings: document.getElementById('settings-modal'),
+            
+            clock: document.getElementById('clock-display'),
+            countdown: document.getElementById('countdown-display'),
+            
+            taskName: document.getElementById('task-name'),
+            taskTimer: document.getElementById('task-timer'),
+            progressCircle: document.getElementById('progress-circle'),
+            
+            btnPauseIcon: document.getElementById('icon-pause'),
+            btnPlayIcon: document.getElementById('icon-play'),
+            
+            inputs: document.querySelectorAll('.setting-input'),
+            edgeGlow: document.getElementById('edge-glow') // Added the glow element
+        };
+
+        /* --- SVG CIRCLE SETUP --- */
+        const circleRadius = els.progressCircle.r.baseVal.value;
+        const circumference = circleRadius * 2 * Math.PI;
+        els.progressCircle.style.strokeDasharray = `${circumference} ${circumference}`;
+        els.progressCircle.style.strokeDashoffset = circumference;
+
+        function setProgress(percent) {
+            const offset = circumference - (percent / 100) * circumference;
+            els.progressCircle.style.strokeDashoffset = offset;
+        }
+
+        /* --- NAVIGATION --- */
+        function switchView(viewId) {
+            document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+            document.getElementById(viewId).classList.add('active');
+            state.view = viewId;
+        }
+
+        /* --- INITIALIZATION & SPLASH --- */
+        window.onload = () => {
+            const minSplashTime = new Promise(resolve => setTimeout(resolve, 5000));
+            // In a real app, you'd also await data loading here
+            
+            minSplashTime.then(() => {
+                // Fade out splash
+                els.splash.style.opacity = '0';
+                setTimeout(() => {
+                    els.splash.style.display = 'none'; // Remove from flow
+                    switchView('main-menu');
+                    // New: Disable the edge glow animation after the splash
+                    els.edgeGlow.classList.add('inactive'); 
+                }, 500); // Matches CSS transition speed
+            });
+
+            startClock();
+        };
+
+        /* --- CLOCK & COUNTDOWN --- */
+        function startClock() {
+            setInterval(() => {
+                const now = new Date();
+                
+                // Update Main Clock
+                const timeString = now.toLocaleTimeString('en-US', { hour12: false });
+                els.clock.textContent = timeString;
+
+                // Update Countdown to 6:00 AM
+                const target = new Date(now);
+                target.setHours(6, 0, 0, 0);
+                
+                // If 6 AM passed today, aim for tomorrow
+                if (now > target) {
+                    target.setDate(target.getDate() + 1);
+                }
+
+                const diff = target - now;
+
+                // TRIGGER LOGIC: If we hit 6:00 AM exactly (within 1s margin)
+                // Note: Logic allows automatic transition
+                if (diff < 1000 && diff > 0 && state.view === 'menu') {
+                    startRoutine();
+                }
+
+                // Format Countdown
+                const h = Math.floor((diff / (1000 * 60 * 60)) % 24);
+                const m = Math.floor((diff / (1000 * 60)) % 60);
+                const s = Math.floor((diff / 1000) % 60);
+                
+                els.countdown.textContent = 
+                    `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+
+            }, 1000);
+        }
+
+        /* --- TASK ENGINE --- */
+        function startRoutine() {
+            state.currentTaskIndex = 0;
+            switchView('task-view');
+            loadTask(state.currentTaskIndex);
+        }
+
+        function loadTask(index) {
+            if (index >= state.tasks.length) {
+                // All done
+                endRoutine();
+                return;
+            }
+
+            const task = state.tasks[index];
+            els.taskName.textContent = task.name;
+            state.timeRemaining = task.duration;
+            state.isPaused = false;
+            
+            updateTimerUI();
+            updateControlsUI();
+            
+            if (state.timerInterval) clearInterval(state.timerInterval);
+            
+            state.timerInterval = setInterval(() => {
+                if (!state.isPaused) {
+                    state.timeRemaining--;
+                    updateTimerUI();
+
+                    if (state.timeRemaining <= 0) {
+                        nextTask();
+                    }
+                }
+            }, 1000);
+        }
+
+        function nextTask() {
+            state.currentTaskIndex++;
+            loadTask(state.currentTaskIndex);
+        }
+
+        function updateTimerUI() {
+            // Text
+            const m = Math.floor(state.timeRemaining / 60);
+            const s = state.timeRemaining % 60;
+            els.taskTimer.textContent = `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+
+            // Circle
+            const currentTaskTotal = state.tasks[state.currentTaskIndex].duration;
+            const percent = (state.timeRemaining / currentTaskTotal) * 100;
+            setProgress(percent);
+        }
+
+        function updateControlsUI() {
+            if (state.isPaused) {
+                els.btnPauseIcon.style.display = 'none';
+                els.btnPlayIcon.style.display = 'block';
+            } else {
+                els.btnPauseIcon.style.display = 'block';
+                els.btnPlayIcon.style.display = 'none';
+            }
+        }
+
+        function endRoutine() {
+            clearInterval(state.timerInterval);
+            switchView('main-menu');
+            els.taskName.textContent = "Routine Complete";
+        }
+
+        /* --- SETTINGS LOGIC --- */
+        function openSettings() {
+            els.settings.classList.add('open');
+            state.settingsDirty = false;
+        }
+
+        function closeSettings() {
+            if (state.settingsDirty) {
+                // Using a custom modal is better, but using confirm() as per original requirement:
+                const leave = confirm("You have unsaved changes. Are you sure you want to close?");
+                if (!leave) return;
+            }
+            els.settings.classList.remove('open');
+            state.settingsDirty = false; // Reset logic
+        }
+
+        function saveSettings() {
+            // Mock save
+            state.settingsDirty = false;
+            els.settings.classList.remove('open');
+        }
+
+        // Track changes
+        els.inputs.forEach(input => {
+            input.addEventListener('change', () => {
+                state.settingsDirty = true;
+            });
+            input.addEventListener('input', () => {
+                // For sliders
+                state.settingsDirty = true;
+            });
+        });
+
+        /* --- EVENT LISTENERS --- */
+        document.getElementById('btn-open-settings').addEventListener('click', openSettings);
+        document.getElementById('btn-close-settings').addEventListener('click', closeSettings);
+        document.getElementById('btn-save-settings').addEventListener('click', saveSettings);
+        
+        document.getElementById('btn-debug-start').addEventListener('click', startRoutine);
+        
+        document.getElementById('btn-pause').addEventListener('click', () => {
+            state.isPaused = !state.isPaused;
+            updateControlsUI();
+        });
+
+        document.getElementById('btn-skip').addEventListener('click', nextTask);
+        
+        document.getElementById('btn-back').addEventListener('click', () => {
+            // Using a custom modal is better, but using confirm() as per original requirement:
+            const confirmBack = confirm("Exit current routine?");
+            if (confirmBack) {
+                endRoutine();
+            }
+        });
+
+    </script>
+</body>
+</html>
