@@ -25,810 +25,448 @@
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
       :root {
-      --safe-top: env(safe-area-inset-top);
-      --safe-bottom: env(safe-area-inset-bottom);
+        --safe-top: env(safe-area-inset-top);
+        --safe-bottom: env(safe-area-inset-bottom);
       }
       body {
-      font-family: 'Inter', sans-serif;
-      background-color: #000000;
-      color: #ffffff;
-      -webkit-tap-highlight-color: transparent;
-      overscroll-behavior: none;
+        font-family: 'Inter', sans-serif;
+        background-color: #000000;
+        color: #ffffff;
+        -webkit-tap-highlight-color: transparent;
+        overscroll-behavior: none;
       }
       /* Utilities */
       .glass {
-      background: rgba(255, 255, 255, 0.03);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
-      border: 1px solid rgba(255, 255, 255, 0.1);
+        background: rgba(255, 255, 255, 0.03);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
       }
       .glass-panel {
-      background: rgba(10, 10, 10, 0.8);
-      backdrop-filter: blur(40px);
-      -webkit-backdrop-filter: blur(40px);
-      border-top: 1px solid rgba(255, 255, 255, 0.15);
+        background: rgba(10, 10, 10, 0.95);
+        backdrop-filter: blur(40px);
+        -webkit-backdrop-filter: blur(40px);
+        border-top: 1px solid rgba(255, 255, 255, 0.15);
+        /* Ensure content doesn't hit the very bottom edge on iPhones */
+        padding-bottom: calc(var(--safe-bottom) + 40px);
       }
       /* Animations */
       @keyframes flow-border {
-      0% { box-shadow: inset 0 0 20px rgba(255, 255, 255, 0); }
-      50% { box-shadow: inset 0 0 40px rgba(255, 255, 255, 0.3); }
-      100% { box-shadow: inset 0 0 20px rgba(255, 255, 255, 0); }
+        0% { box-shadow: inset 0 0 20px rgba(255, 255, 255, 0); }
+        50% { box-shadow: inset 0 0 40px rgba(255, 255, 255, 0.3); }
+        100% { box-shadow: inset 0 0 20px rgba(255, 255, 255, 0); }
       }
       @keyframes fade-in-up {
-      from { opacity: 0; transform: translateY(20px); }
-      to { opacity: 1; transform: translateY(0); }
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
       }
       .animate-flow {
-      animation: flow-border 4s infinite ease-in-out;
+        animation: flow-border 4s infinite ease-in-out;
       }
       /* Custom Toggle Switch */
-      .toggle-checkbox:checked {
-      right: 0;
-      border-color: #ffffff;
-      }
       .toggle-checkbox:checked + .toggle-label {
-      background-color: #ffffff;
+        background-color: #ffffff;
       }
       .toggle-checkbox:checked + .toggle-label:before {
-      transform: translateX(100%);
+        transform: translateX(22px);
       }
       .toggle-label {
-      width: 50px;
-      height: 28px;
-      background-color: #333;
-      border-radius: 9999px;
-      position: relative;
-      cursor: pointer;
-      transition: background-color 0.2s ease-in-out;
+        width: 50px;
+        height: 28px;
+        background-color: #333;
+        border-radius: 9999px;
+        position: relative;
+        cursor: pointer;
+        transition: background-color 0.2s ease-in-out;
       }
       .toggle-label:before {
-      content: '';
-      position: absolute;
-      top: 2px;
-      left: 2px;
-      width: 24px;
-      height: 24px;
-      background-color: #000;
-      border-radius: 50%;
-      transition: transform 0.2s ease-in-out;
+        content: '';
+        position: absolute;
+        top: 2px;
+        left: 2px;
+        width: 24px;
+        height: 24px;
+        background-color: #000;
+        border-radius: 50%;
+        transition: transform 0.2s ease-in-out;
       }
       /* Custom Slider */
       input[type=range] {
-      -webkit-appearance: none;
-      width: 100%;
-      background: transparent;
+        -webkit-appearance: none;
+        width: 100%;
+        background: transparent;
       }
       input[type=range]::-webkit-slider-thumb {
-      -webkit-appearance: none;
-      height: 24px;
-      width: 24px;
-      border-radius: 50%;
-      background: #ffffff;
-      cursor: pointer;
-      margin-top: -11px;
-      box-shadow: 0 0 10px rgba(255,255,255,0.5);
+        -webkit-appearance: none;
+        height: 24px;
+        width: 24px;
+        border-radius: 50%;
+        background: #ffffff;
+        cursor: pointer;
+        margin-top: -11px;
+        box-shadow: 0 0 10px rgba(255,255,255,0.5);
       }
       input[type=range]::-webkit-slider-runnable-track {
-      width: 100%;
-      height: 2px;
-      cursor: pointer;
-      background: #333;
+        width: 100%;
+        height: 2px;
+        cursor: pointer;
+        background: #333;
       }
       /* Progress Circle */
       .progress-ring__circle {
-      transition: stroke-dashoffset 0.35s;
-      transform: rotate(-90deg);
-      transform-origin: 50% 50%;
+        transition: stroke-dashoffset 0.35s;
+        transform: rotate(-90deg);
+        transform-origin: 50% 50%;
       }
       /* Exercise Checklist Animations */
       @keyframes checkbox-fill {
-      0% { 
-        background-color: transparent;
-        border-color: rgba(255, 255, 255, 0.3);
-        transform: scale(1);
-      }
-      50% {
-        transform: scale(1.1);
-      }
-      100% { 
-        background-color: #ffffff;
-        border-color: #ffffff;
-        transform: scale(1);
-      }
+        0% { transform: scale(1); }
+        50% { transform: scale(1.1); }
+        100% { background-color: #ffffff; border-color: #ffffff; transform: scale(1); }
       }
       @keyframes checkmark-appear {
-      0% {
-        opacity: 0;
-        transform: scale(0.3) rotate(-10deg);
-      }
-      60% {
-        transform: scale(1.15) rotate(5deg);
-      }
-      100% {
-        opacity: 1;
-        transform: scale(1) rotate(0deg);
-      }
+        0% { opacity: 0; transform: scale(0.3) rotate(-10deg); }
+        100% { opacity: 1; transform: scale(1) rotate(0deg); }
       }
       .checkbox-completed {
-      animation: checkbox-fill 0.5s ease-out forwards;
+        animation: checkbox-fill 0.5s ease-out forwards;
       }
       .checkmark-icon {
-      animation: checkmark-appear 0.6s ease-out 0.2s forwards;
-      opacity: 0;
-      object-fit: contain;
-      }
-      .checkbox-completed .checkmark-icon {
-      opacity: 1 !important;
-      }
-      .hide-scrollbar::-webkit-scrollbar {
-      display: none;
+        animation: checkmark-appear 0.6s ease-out 0.2s forwards;
+        opacity: 0;
       }
     </style>
-  
-    <link rel="manifest" href="manifest.json">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="default">
-    <meta name="apple-mobile-web-app-title" content="Covenant">
-    <link rel="apple-touch-icon" href="icon.png">
-    <script>if('serviceWorker' in navigator){navigator.serviceWorker.register('sw.js');}</script>
-</head>
+  </head>
   <body class="h-screen w-screen overflow-hidden flex justify-center bg-black">
-    <!-- Mobile Container -->
-    <div
-      class="relative w-full h-full max-w-[430px] flex flex-col overflow-hidden bg-black text-white"
-    >
+    <div class="relative w-full h-full max-w-[430px] flex flex-col overflow-hidden bg-black text-white">
+      
       <!-- Splash Screen -->
-      <div
-        id="splash"
-        class="absolute inset-0 z-50 flex flex-col items-center justify-center bg-black animate-flow transition-opacity duration-1000"
-        style="opacity: 1; pointer-events: auto;"
-      >
+      <div id="splash" class="absolute inset-0 z-50 flex flex-col items-center justify-center bg-black animate-flow transition-opacity duration-1000">
         <div class="text-center space-y-4 flex flex-col items-center justify-center">
-          <img
-            src="Logo/Logo3.png"
-            alt="Covenant"
-            class="w-32 h-auto animate-[fade-in-up_1s_ease-out]"
-            onerror="this.style.display='none'; document.getElementById('splash-text').style.opacity='1';"
-          />
-          <h1
-            id="splash-text"
-            class="text-xl font-light tracking-[0.2em] uppercase opacity-0 animate-[fade-in-up_1s_ease-out_0.5s_forwards]"
-          >
-            Covenant
-          </h1>
+          <img src="Logo/Logo3.png" alt="Covenant" class="w-32 h-auto animate-[fade-in-up_1s_ease-out]" onerror="this.style.display='none'; document.getElementById('splash-text').style.opacity='1';"/>
+          <h1 id="splash-text" class="text-xl font-light tracking-[0.2em] uppercase opacity-0 animate-[fade-in-up_1s_ease-out_0.5s_forwards]">Covenant</h1>
         </div>
       </div>
 
       <!-- Main Menu -->
-      <main
-        id="main-menu"
-        class="flex-1 flex flex-col justify-between pt-[calc(env(safe-area-inset-top)+20px)] pb-[calc(env(safe-area-inset-bottom)+20px)] px-6 transition-opacity duration-500 opacity-0 pointer-events-none"
-        style="opacity: 0; pointer-events: none;"
-      >
+      <main id="main-menu" class="flex-1 flex flex-col justify-between pt-[calc(var(--safe-top)+20px)] pb-[calc(var(--safe-bottom)+60px)] px-8 opacity-0 pointer-events-none transition-opacity duration-500">
         <!-- Header -->
         <div class="flex justify-between items-center">
-          <button
-            onclick="openSettings()"
-            class="p-2 -ml-2 rounded-full hover:bg-white/10 transition-colors"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              data-lucide="settings-2"
-              class="lucide lucide-settings-2 w-6 h-6 text-white/80"
-            >
-              <path d="M14 17H5"></path>
-              <path d="M19 7h-9"></path>
-              <circle cx="17" cy="17" r="3"></circle>
-              <circle cx="7" cy="7" r="3"></circle>
-            </svg>
+          <button onclick="openSettings()" class="p-2 -ml-2 rounded-full hover:bg-white/10 transition-colors">
+            <i data-lucide="settings-2" class="w-6 h-6 text-white/80"></i>
           </button>
-          <button
-            onclick="startRoutine()"
-            class="text-[10px] uppercase tracking-widest text-neutral-600 border border-neutral-800 px-3 py-1 rounded-full hover:text-white transition-colors"
-          >
+          <button onclick="startRoutine()" class="text-[10px] uppercase tracking-widest text-neutral-500 border border-neutral-800 px-4 py-1.5 rounded-full hover:text-white transition-colors">
             Start
           </button>
         </div>
 
         <!-- Center Clock -->
         <div class="flex flex-col items-center justify-center space-y-2">
-          <div
-            id="real-time-clock"
-            class="text-5xl font-thin tracking-tighter tabular-nums text-white whitespace-nowrap"
-          >
-            --:--:--
-          </div>
-          <div
-            class="text-sm font-medium tracking-widest text-neutral-500 uppercase"
-          >
-            Local Time
-          </div>
+          <div id="real-time-clock" class="text-5xl font-thin tracking-tighter tabular-nums text-white">--:--:--</div>
+          <div class="text-sm font-medium tracking-widest text-neutral-500 uppercase">Local Time</div>
         </div>
 
         <!-- Footer -->
         <div class="space-y-6 text-center">
           <div class="flex flex-col items-center space-y-1">
-            <span class="text-xs uppercase tracking-widest text-neutral-600">
-              Protocol Begins In
-            </span>
-            <span
-              id="countdown-timer"
-              class="text-xl font-mono text-red-600 tracking-tight tabular-nums"
-            >
-              --:--:--
-            </span>
+            <span class="text-xs uppercase tracking-widest text-neutral-600">Protocol Begins In</span>
+            <span id="countdown-timer" class="text-xl font-mono text-red-600 tracking-tight tabular-nums">--:--:--</span>
           </div>
         </div>
       </main>
 
-      <!-- Routine/Task View -->
-      <div
-        id="routine-view"
-        class="absolute inset-0 z-30 bg-black flex flex-col pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)] transition-transform duration-500 translate-x-full"
-      >
-        <!-- Routine Header -->
-        <div
-          class="h-16 flex items-center justify-between px-6 border-b border-white/5"
-        >
+      <!-- Routine View -->
+      <div id="routine-view" class="absolute inset-0 z-30 bg-black flex flex-col pt-[var(--safe-top)] pb-[var(--safe-bottom)] transition-transform duration-500 translate-x-full">
+        <div class="h-20 flex items-center justify-between px-6 border-b border-white/5">
           <div>
-            <span
-              class="block text-xs uppercase tracking-widest text-neutral-500"
-            >
-              Current Task
-            </span>
-            <span id="task-title" class="text-lg font-normal tracking-tight">
-              Initialization
-            </span>
-            <div
-              id="task-desc"
-              class="text-xs text-neutral-400 mt-1 leading-tight hidden max-w-[240px]"
-            ></div>
+            <span class="block text-xs uppercase tracking-widest text-neutral-500">Current Task</span>
+            <span id="task-title" class="text-lg font-normal tracking-tight">Initialization</span>
+            <div id="task-desc" class="text-xs text-neutral-400 mt-1 leading-tight hidden max-w-[240px]"></div>
           </div>
-          <div id="task-counter" class="text-xs text-neutral-500 font-mono">
-            1/4
-          </div>
+          <div id="task-counter" class="text-xs text-neutral-500 font-mono">1/18</div>
         </div>
 
-        <!-- Timer Visualization -->
         <div class="flex-1 flex flex-col items-center justify-center relative">
-          <!-- Exercise Checklist -->
-          <div id="exercise-checklist" class="hidden w-full max-w-sm px-6 mb-6">
-            <div class="space-y-2">
-              <div id="checklist-items" class="space-y-2"></div>
-            </div>
+          <div id="exercise-checklist" class="hidden w-full max-w-sm px-8 mb-8">
+            <div id="checklist-items" class="space-y-2"></div>
           </div>
-          <!-- SVG Circle -->
           <div class="relative">
-            <svg class="w-72 h-72 transform" width="288" height="288">
-              <circle
-                class="text-neutral-900"
-                stroke-width="2"
-                stroke="currentColor"
-                fill="transparent"
-                r="130"
-                cx="144"
-                cy="144"
-              ></circle>
-              <circle
-                id="progress-ring"
-                class="text-white progress-ring__circle"
-                stroke-width="4"
-                stroke="currentColor"
-                fill="transparent"
-                r="130"
-                cx="144"
-                cy="144"
-                stroke-dasharray="816.8"
-                stroke-dashoffset="0"
-                stroke-linecap="round"
-              ></circle>
+            <svg class="w-72 h-72" viewBox="0 0 288 288">
+              <circle class="text-neutral-900" stroke-width="2" stroke="currentColor" fill="transparent" r="130" cx="144" cy="144"></circle>
+              <circle id="progress-ring" class="text-white progress-ring__circle" stroke-width="4" stroke="currentColor" fill="transparent" r="130" cx="144" cy="144" stroke-dasharray="816.8" stroke-dashoffset="0" stroke-linecap="round"></circle>
             </svg>
-            <!-- Digital Timer inside Circle -->
             <div class="absolute inset-0 flex items-center justify-center">
-              <span
-                id="routine-timer"
-                class="text-5xl font-thin tracking-tighter tabular-nums"
-              >
-                00:00
-              </span>
+              <span id="routine-timer" class="text-5xl font-thin tracking-tighter tabular-nums">00:00</span>
             </div>
           </div>
         </div>
 
-        <!-- Controls -->
-        <div class="h-32 px-8 flex items-center justify-between pb-8">
-          <button
-            onclick="exitRoutine()"
-            class="w-16 h-16 rounded-full flex items-center justify-center border border-white/10 hover:bg-white/5 active:scale-95 transition-all"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              data-lucide="x"
-              class="lucide lucide-x w-6 h-6 text-neutral-400"
-            >
-              <path d="M18 6 6 18"></path>
-              <path d="m6 6 12 12"></path>
-            </svg>
+        <div class="h-32 px-10 flex items-center justify-between pb-8">
+          <button onclick="exitRoutine()" class="w-14 h-14 rounded-full flex items-center justify-center border border-white/10 active:scale-95 transition-all">
+            <i data-lucide="x" class="w-6 h-6 text-neutral-400"></i>
           </button>
-
-          <button
-            id="play-pause-btn"
-            onclick="togglePause()"
-            class="w-20 h-20 rounded-full bg-white text-black flex items-center justify-center hover:bg-neutral-200 active:scale-95 transition-all shadow-[0_0_20px_rgba(255,255,255,0.2)]"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              data-lucide="pause"
-              class="lucide lucide-pause w-8 h-8 fill-current"
-            >
-              <rect x="14" y="3" width="5" height="18" rx="1"></rect>
-              <rect x="5" y="3" width="5" height="18" rx="1"></rect>
-            </svg>
+          <button id="play-pause-btn" onclick="togglePause()" class="w-20 h-20 rounded-full bg-white text-black flex items-center justify-center active:scale-95 transition-all shadow-[0_0_20px_rgba(255,255,255,0.2)]">
+            <i data-lucide="pause" class="w-8 h-8 fill-current"></i>
           </button>
-
-          <button
-            onclick="nextTask()"
-            class="w-16 h-16 rounded-full flex items-center justify-center border border-white/10 hover:bg-white/5 active:scale-95 transition-all"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              data-lucide="skip-forward"
-              class="lucide lucide-skip-forward w-6 h-6 text-neutral-400"
-            >
-              <path d="M21 4v16"></path>
-              <path
-                d="M6.029 4.285A2 2 0 0 0 3 6v12a2 2 0 0 0 3.029 1.715l9.997-5.998a2 2 0 0 0 .003-3.432z"
-              ></path>
-            </svg>
+          <button onclick="nextTask()" class="w-14 h-14 rounded-full flex items-center justify-center border border-white/10 active:scale-95 transition-all">
+            <i data-lucide="skip-forward" class="w-6 h-6 text-neutral-400"></i>
           </button>
         </div>
       </div>
 
-      <!-- Settings Modal (Glass Overlay) -->
-      <div
-        id="settings-modal"
-        class="absolute inset-0 z-40 bg-black/60 backdrop-blur-sm opacity-0 pointer-events-none transition-opacity duration-300"
-      >
-        <div
-          class="absolute bottom-0 w-full glass-panel rounded-t-[30px] pb-[env(safe-area-inset-bottom)] transform translate-y-full transition-transform duration-300 ease-out"
-          id="settings-panel"
-        >
-          <div
-            class="flex items-center justify-between px-6 py-4 border-b border-white/10"
-          >
-            <button
-              onclick="closeSettings()"
-              class="text-sm font-medium text-neutral-400 p-2"
-            >
-              Cancel
-            </button>
-            <span class="text-sm font-semibold tracking-tight">
-              Configuration
-            </span>
-            <button
-              onclick="saveSettings()"
-              class="text-sm font-medium text-white p-2"
-            >
-              Save
-            </button>
+      <!-- Settings Modal -->
+      <div id="settings-modal" class="absolute inset-0 z-40 bg-black/60 backdrop-blur-sm opacity-0 pointer-events-none transition-opacity duration-300">
+        <div id="settings-panel" class="absolute bottom-0 w-full glass-panel rounded-t-[32px] transform translate-y-full transition-transform duration-300 ease-out">
+          <div class="flex items-center justify-between px-8 py-6 border-b border-white/10">
+            <button onclick="closeSettings()" class="text-sm font-medium text-neutral-400">Cancel</button>
+            <span class="text-sm font-semibold tracking-tight">Configuration</span>
+            <button onclick="saveSettings()" class="text-sm font-medium text-white">Save</button>
           </div>
 
-          <div class="p-6 space-y-8">
-            <!-- Toggle 1 -->
+          <div class="p-8 space-y-10">
             <div class="flex items-center justify-between">
-              <div class="flex flex-col">
-                <span class="text-sm font-medium">Haptic Feedback</span>
-                <span class="text-xs text-neutral-500">
-                  Vibrate on timer completion
-                </span>
+              <div>
+                <span class="text-sm font-medium block">Haptic Feedback</span>
+                <span class="text-xs text-neutral-500">Vibrate on completions</span>
               </div>
-              <div class="relative inline-block w-12 align-middle select-none">
-                <input
-                  type="checkbox"
-                  id="toggle-haptic"
-                  class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer hidden"
-                />
-                <label
-                  for="toggle-haptic"
-                  class="toggle-label block overflow-hidden h-6 rounded-full bg-neutral-800 cursor-pointer"
-                ></label>
+              <div class="relative inline-block w-12 h-7 align-middle">
+                <input type="checkbox" id="toggle-haptic" class="toggle-checkbox hidden" />
+                <label for="toggle-haptic" class="toggle-label block"></label>
               </div>
             </div>
 
-            <!-- Toggle 2 -->
             <div class="flex items-center justify-between">
-              <div class="flex flex-col">
-                <span class="text-sm font-medium">Dark Mode Override</span>
+              <div>
+                <span class="text-sm font-medium block">Dark Mode Override</span>
                 <span class="text-xs text-neutral-500">Force OLED black</span>
               </div>
-              <div class="relative inline-block w-12 align-middle select-none">
-                <input
-                  type="checkbox"
-                  id="toggle-oled"
-                  class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer hidden"
-                  checked=""
-                />
-                <label
-                  for="toggle-oled"
-                  class="toggle-label block overflow-hidden h-6 rounded-full bg-neutral-800 cursor-pointer"
-                ></label>
+              <div class="relative inline-block w-12 h-7 align-middle">
+                <input type="checkbox" id="toggle-oled" class="toggle-checkbox hidden" checked />
+                <label for="toggle-oled" class="toggle-label block"></label>
               </div>
             </div>
 
-            <!-- Slider -->
-            <div class="space-y-3">
+            <div class="space-y-4">
               <div class="flex justify-between">
                 <span class="text-sm font-medium">Audio Volume</span>
-                <span class="text-xs text-neutral-500" id="volume-display">
-                  65%
-                </span>
+                <span class="text-xs text-neutral-500" id="volume-display">65%</span>
               </div>
-              <input
-                id="volume-slider"
-                type="range"
-                min="0"
-                max="100"
-                value="65"
-                class="w-full h-1 bg-neutral-800 rounded-lg appearance-none cursor-pointer"
-                oninput="updateVolume(this.value)"
-              />
+              <input id="volume-slider" type="range" min="0" max="100" value="65" oninput="updateVolume(this.value)" />
             </div>
           </div>
         </div>
       </div>
     </div>
 
-    <script class="">
-      // Init Icons
+    <script>
       lucide.createIcons();
 
-      // Constants & State
       const ROUTINE_DATA = [
-          { title: 'Wake up. Drink water.', duration: 60 },
-          { title: 'Make the bed.', duration: 120 },
-          { title: 'Cat-Cow stretch', duration: 60, group: 'stretching', groupIndex: 0 },
-          { title: 'Hip-Flexor Stretch', duration: 60, group: 'stretching', groupIndex: 1 },
-          { title: 'Thoracic Spine Rotation', duration: 60, group: 'stretching', groupIndex: 2 },
-          { title: 'Forward Fold – Standing', duration: 60, group: 'stretching', groupIndex: 3 },
-          { title: 'Child’s Pose', duration: 60, group: 'stretching', groupIndex: 4 },
-          { title: 'Do nothing.', duration: 60, desc: 'Wait 1 minute.' },
-          { title: 'Scapular Wall Slides', duration: 60, group: 'posture', groupIndex: 0 },
-          { title: 'Bird Dog', duration: 60, group: 'posture', groupIndex: 1 },
-          { title: 'Dead Bug', duration: 60, group: 'posture', groupIndex: 2 },
-          { title: 'Prone Superman', duration: 60, group: 'posture', groupIndex: 3 },
-          { title: 'Do nothing.', duration: 60, desc: 'Wait 1 minute.' },
-          { title: 'Shadowboxing – Round 1', duration: 120 },
-          { title: 'Rest', duration: 120 },
-          { title: 'Shadowboxing – Round 2', duration: 120 },
-          { title: 'Rest', duration: 120 },
-          { title: 'Relax', duration: 300, desc: 'Open blinds, Stand there, Drink water' }
+        { title: 'Wake up. Drink water.', duration: 60 },
+        { title: 'Make the bed.', duration: 120 },
+        { title: 'Cat-Cow stretch', duration: 60, group: 'stretching', groupIndex: 0 },
+        { title: 'Hip-Flexor Stretch', duration: 60, group: 'stretching', groupIndex: 1 },
+        { title: 'Thoracic Spine Rotation', duration: 60, group: 'stretching', groupIndex: 2 },
+        { title: 'Forward Fold – Standing', duration: 60, group: 'stretching', groupIndex: 3 },
+        { title: 'Child’s Pose', duration: 60, group: 'stretching', groupIndex: 4 },
+        { title: 'Do nothing.', duration: 60, desc: 'Wait 1 minute.' },
+        { title: 'Scapular Wall Slides', duration: 60, group: 'posture', groupIndex: 0 },
+        { title: 'Bird Dog', duration: 60, group: 'posture', groupIndex: 1 },
+        { title: 'Dead Bug', duration: 60, group: 'posture', groupIndex: 2 },
+        { title: 'Prone Superman', duration: 60, group: 'posture', groupIndex: 3 },
+        { title: 'Do nothing.', duration: 60, desc: 'Wait 1 minute.' },
+        { title: 'Shadowboxing – Round 1', duration: 120 },
+        { title: 'Rest', duration: 120 },
+        { title: 'Shadowboxing – Round 2', duration: 120 },
+        { title: 'Rest', duration: 120 },
+        { title: 'Relax', duration: 300, desc: 'Open blinds, Stand there, Drink water' }
       ];
 
       const EXERCISE_GROUPS = {
-          stretching: [
-              'Cat-Cow stretch (1 min)',
-              'Hip-Flexor Stretch (30 sec each side)',
-              'Thoracic Spine Rotation (1 min)',
-              'Forward Fold – Standing (1 min)',
-              'Child’s Pose (1 min)'
-          ],
-          posture: [
-              'Scapular Wall Slides (1 min)',
-              'Bird Dog (1 min)',
-              'Dead Bug (1 min)',
-              'Prone Superman (1 min)'
-          ]
+        stretching: ['Cat-Cow stretch', 'Hip-Flexor Stretch', 'Thoracic Spine Rotation', 'Forward Fold', 'Child’s Pose'],
+        posture: ['Scapular Wall Slides', 'Bird Dog', 'Dead Bug', 'Prone Superman']
       };
 
       let state = {
-          isSettingsDirty: false,
-          currentTaskIndex: 0,
-          timeLeft: 0,
-          isPaused: false,
-          timerInterval: null,
-          currentGroup: null,
-          completedExercises: {},
-          audioVolume: 0.65,
-          isRoutineActive: false,
-          autoStartTriggeredToday: false
+        isSettingsDirty: false,
+        currentTaskIndex: 0,
+        timeLeft: 0,
+        isPaused: false,
+        timerInterval: null,
+        currentGroup: null,
+        completedExercises: {},
+        audioVolume: 0.65,
+        isRoutineActive: false,
+        autoStartTriggeredToday: false
       };
 
-      // Define Audio
       const alarmSound = new Audio('SoundEffect/NotificationAlarm.mp3');
 
       const elements = {
-          splash: document.getElementById('splash'),
-          mainMenu: document.getElementById('main-menu'),
-          routineView: document.getElementById('routine-view'),
-          clockDisplay: document.getElementById('real-time-clock'),
-          countdownDisplay: document.getElementById('countdown-timer'),
-          settingsModal: document.getElementById('settings-modal'),
-          settingsPanel: document.getElementById('settings-panel'),
-          inputs: document.querySelectorAll('input'),
-          taskTitle: document.getElementById('task-title'),
-          taskDesc: document.getElementById('task-desc'),
-          taskCounter: document.getElementById('task-counter'),
-          routineTimer: document.getElementById('routine-timer'),
-          progressRing: document.getElementById('progress-ring'),
-          playPauseBtn: document.getElementById('play-pause-btn'),
-          exerciseChecklist: document.getElementById('exercise-checklist'),
-          checklistItems: document.getElementById('checklist-items')
+        mainMenu: document.getElementById('main-menu'),
+        routineView: document.getElementById('routine-view'),
+        clockDisplay: document.getElementById('real-time-clock'),
+        countdownDisplay: document.getElementById('countdown-timer'),
+        settingsModal: document.getElementById('settings-modal'),
+        settingsPanel: document.getElementById('settings-panel'),
+        taskTitle: document.getElementById('task-title'),
+        taskDesc: document.getElementById('task-desc'),
+        taskCounter: document.getElementById('task-counter'),
+        routineTimer: document.getElementById('routine-timer'),
+        progressRing: document.getElementById('progress-ring'),
+        playPauseBtn: document.getElementById('play-pause-btn'),
+        exerciseChecklist: document.getElementById('exercise-checklist'),
+        checklistItems: document.getElementById('checklist-items')
       };
 
       const RING_CIRCUMFERENCE = 816.8;
 
       window.addEventListener('load', () => {
-          setTimeout(() => {
-              elements.splash.style.opacity = '0';
-              elements.splash.style.pointerEvents = 'none';
-              elements.mainMenu.style.opacity = '1';
-              elements.mainMenu.style.pointerEvents = 'auto';
-              initClock();
-          }, 4000); 
-
-          elements.inputs.forEach(input => {
-              input.addEventListener('change', () => {
-                  state.isSettingsDirty = true;
-              });
-          });
+        setTimeout(() => {
+          document.getElementById('splash').style.opacity = '0';
+          document.getElementById('splash').style.pointerEvents = 'none';
+          elements.mainMenu.style.opacity = '1';
+          elements.mainMenu.style.pointerEvents = 'auto';
+          initClock();
+        }, 3000); 
       });
 
       function initClock() {
-          updateClock();
-          // Precise 1-second interval
-          setInterval(updateClock, 1000);
+        updateClock();
+        setInterval(updateClock, 1000);
       }
 
       function updateClock() {
-          const now = new Date();
-          
-          // Display Time
-          const fullTimeString = now.toLocaleTimeString('en-US', {
-              hour12: true,
-              hour: '2-digit',
-              minute: '2-digit',
-              second: '2-digit'
-          });
-          elements.clockDisplay.innerText = fullTimeString;
+        const now = new Date();
+        elements.clockDisplay.innerText = now.toLocaleTimeString('en-US', { hour12: true, hour: '2-digit', minute: '2-digit', second: '2-digit' });
 
-          // Countdown to 06:00:00
-          const target = new Date();
-          target.setHours(6, 0, 0, 0);
-          if (now > target) {
-              target.setDate(target.getDate() + 1);
-          }
+        const target = new Date();
+        target.setHours(6, 0, 0, 0);
+        if (now > target) target.setDate(target.getDate() + 1);
 
-          const diff = target - now;
-          const h = Math.floor(diff / (1000 * 60 * 60));
-          const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-          const s = Math.floor((diff % (1000 * 60)) / 1000);
+        const diff = target - now;
+        const h = Math.floor(diff / 3600000);
+        const m = Math.floor((diff % 3600000) / 60000);
+        const s = Math.floor((diff % 60000) / 1000);
+        elements.countdownDisplay.innerText = `${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
 
-          elements.countdownDisplay.innerText =
-              `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
-
-          // --- AUTO START VERIFICATION ---
-          // Check if it is EXACTLY 6:00:00 AM
-          const isSixAM = now.getHours() === 6 && now.getMinutes() === 0 && now.getSeconds() === 0;
-          
-          if (isSixAM && !state.isRoutineActive && !state.autoStartTriggeredToday) {
-              state.autoStartTriggeredToday = true;
-              startRoutine();
-          }
-
-          // Reset the daily trigger flag at midnight so it can run again tomorrow
-          if (now.getHours() === 0 && now.getMinutes() === 0 && now.getSeconds() === 0) {
-              state.autoStartTriggeredToday = false;
-          }
+        if (now.getHours() === 6 && now.getMinutes() === 0 && now.getSeconds() === 0 && !state.isRoutineActive && !state.autoStartTriggeredToday) {
+          state.autoStartTriggeredToday = true;
+          startRoutine();
+        }
+        if (now.getHours() === 0) state.autoStartTriggeredToday = false;
       }
 
       function startRoutine() {
-          state.isRoutineActive = true;
-          state.currentTaskIndex = 0;
-          state.completedExercises = {};
-          state.currentGroup = null;
-          loadTask(state.currentTaskIndex);
-          elements.routineView.style.transform = 'translateX(0)';
+        state.isRoutineActive = true;
+        state.currentTaskIndex = 0;
+        state.completedExercises = {};
+        loadTask(0);
+        elements.routineView.style.transform = 'translateX(0)';
       }
 
       function exitRoutine() {
-          state.isRoutineActive = false;
-          clearInterval(state.timerInterval);
-          elements.routineView.style.transform = 'translateX(100%)';
+        state.isRoutineActive = false;
+        clearInterval(state.timerInterval);
+        elements.routineView.style.transform = 'translateX(100%)';
       }
 
       function loadTask(index) {
-          if (index >= ROUTINE_DATA.length) {
-              exitRoutine();
-              return;
-          }
+        if (index >= ROUTINE_DATA.length) return exitRoutine();
+        const task = ROUTINE_DATA[index];
+        state.timeLeft = task.duration;
+        state.isPaused = false;
+        elements.taskTitle.innerText = task.title;
+        elements.taskCounter.innerText = `${index + 1}/${ROUTINE_DATA.length}`;
+        
+        if (task.desc) {
+          elements.taskDesc.innerText = task.desc;
+          elements.taskDesc.classList.remove('hidden');
+        } else elements.taskDesc.classList.add('hidden');
 
-          const task = ROUTINE_DATA[index];
-          state.timeLeft = task.duration;
-          state.isPaused = false;
+        if (task.group) {
+          state.currentGroup = task.group;
+          renderChecklist(task.group, task.groupIndex);
+          elements.exerciseChecklist.classList.remove('hidden');
+        } else {
+          elements.exerciseChecklist.classList.add('hidden');
+        }
 
-          elements.taskTitle.innerText = task.title;
-          if (task.desc) {
-              elements.taskDesc.innerText = task.desc;
-              elements.taskDesc.classList.remove('hidden');
-          } else {
-              elements.taskDesc.classList.add('hidden');
-          }
-
-          elements.taskCounter.innerText = `${index + 1}/${ROUTINE_DATA.length}`;
-          updateTimerDisplay();
-          updatePlayPauseIcon();
-
-          if (task.group) {
-              state.currentGroup = task.group;
-              renderChecklist(task.group, task.groupIndex, null);
-              elements.exerciseChecklist.classList.remove('hidden');
-          } else {
-              state.currentGroup = null;
-              elements.exerciseChecklist.classList.add('hidden');
-          }
-
-          elements.progressRing.style.strokeDashoffset = 0;
-          clearInterval(state.timerInterval);
-          state.timerInterval = setInterval(tick, 1000);
-      }
-
-      function renderChecklist(groupName, currentIndex, justCompletedIndex = null) {
-          const exercises = EXERCISE_GROUPS[groupName];
-          if (!exercises) return;
-
-          elements.checklistItems.innerHTML = '';
-          exercises.forEach((exercise, index) => {
-              const isCompleted = state.completedExercises[`${groupName}-${index}`] || false;
-              const isCurrent = index === currentIndex;
-              const isJustCompleted = index === justCompletedIndex;
-              
-              const item = document.createElement('div');
-              item.className = `flex items-center space-x-3 px-4 py-2 rounded-lg transition-colors ${isCurrent ? 'bg-white/10' : ''}`;
-              
-              const checkbox = document.createElement('div');
-              if (isCompleted) {
-                  checkbox.className = `w-5 h-5 rounded border-2 flex items-center justify-center ${isJustCompleted ? 'checkbox-completed' : ''}`;
-                  if (!isJustCompleted) {
-                      checkbox.style.backgroundColor = '#ffffff';
-                      checkbox.style.borderColor = '#ffffff';
-                  }
-              } else {
-                  checkbox.className = 'w-5 h-5 rounded border-2 flex items-center justify-center border-white/30';
-              }
-              
-              if (isCompleted) {
-                  const checkmark = document.createElement('img');
-                  checkmark.className = `w-4 h-4 ${isJustCompleted ? 'checkmark-icon' : ''}`;
-                  if (!isJustCompleted) checkmark.style.opacity = '1';
-                  checkmark.setAttribute('src', 'Icon/Checkmark.svg');
-                  checkmark.onerror = function() { this.style.display = 'none'; };
-                  checkbox.appendChild(checkmark);
-              }
-              
-              const label = document.createElement('span');
-              label.className = `text-sm ${isCompleted ? 'text-neutral-500 line-through' : isCurrent ? 'text-white font-medium' : 'text-neutral-400'}`;
-              label.textContent = exercise;
-              
-              item.appendChild(checkbox);
-              item.appendChild(label);
-              elements.checklistItems.appendChild(item);
-          });
+        elements.progressRing.style.strokeDashoffset = 0;
+        updateTimerDisplay();
+        updatePlayPauseIcon();
+        clearInterval(state.timerInterval);
+        state.timerInterval = setInterval(tick, 1000);
       }
 
       function tick() {
-          if (state.isPaused) return;
-
-          if (state.timeLeft > 0) {
-              state.timeLeft--;
-              updateTimerDisplay();
-              const taskDuration = ROUTINE_DATA[state.currentTaskIndex].duration;
-              const offset = RING_CIRCUMFERENCE - (state.timeLeft / taskDuration) * RING_CIRCUMFERENCE;
-              elements.progressRing.style.strokeDashoffset = offset;
-          } else {
-              playAlarm();
-              nextTask();
-          }
-      }
-
-      function playAlarm() {
+        if (state.isPaused) return;
+        if (state.timeLeft > 0) {
+          state.timeLeft--;
+          updateTimerDisplay();
+          const duration = ROUTINE_DATA[state.currentTaskIndex].duration;
+          elements.progressRing.style.strokeDashoffset = RING_CIRCUMFERENCE - (state.timeLeft / duration) * RING_CIRCUMFERENCE;
+        } else {
           alarmSound.volume = state.audioVolume;
-          alarmSound.currentTime = 0;
           alarmSound.play().catch(() => {});
+          nextTask();
+        }
       }
 
       function nextTask() {
-          const currentTask = ROUTINE_DATA[state.currentTaskIndex];
-          let justCompletedIndex = null;
-          
-          if (currentTask && currentTask.group !== undefined) {
-              const key = `${currentTask.group}-${currentTask.groupIndex}`;
-              state.completedExercises[key] = true;
-              justCompletedIndex = currentTask.groupIndex;
-              renderChecklist(currentTask.group, currentTask.groupIndex, justCompletedIndex);
-          }
-          
-          state.currentTaskIndex++;
-          loadTask(state.currentTaskIndex);
+        const task = ROUTINE_DATA[state.currentTaskIndex];
+        if (task.group) state.completedExercises[`${task.group}-${task.groupIndex}`] = true;
+        state.currentTaskIndex++;
+        loadTask(state.currentTaskIndex);
       }
 
       function togglePause() {
-          state.isPaused = !state.isPaused;
-          updatePlayPauseIcon();
+        state.isPaused = !state.isPaused;
+        updatePlayPauseIcon();
       }
 
       function updatePlayPauseIcon() {
-          const icon = state.isPaused ? 'play' : 'pause';
-          elements.playPauseBtn.innerHTML = `<i data-lucide="${icon}" class="w-8 h-8 fill-current"></i>`;
-          lucide.createIcons();
+        elements.playPauseBtn.innerHTML = `<i data-lucide="${state.isPaused ? 'play' : 'pause'}" class="w-8 h-8 fill-current"></i>`;
+        lucide.createIcons();
       }
 
       function updateTimerDisplay() {
-          const m = Math.floor(state.timeLeft / 60);
-          const s = state.timeLeft % 60;
-          elements.routineTimer.innerText = `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+        const m = Math.floor(state.timeLeft / 60);
+        const s = state.timeLeft % 60;
+        elements.routineTimer.innerText = `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
       }
 
-      function updateVolume(val) {
-          document.getElementById('volume-display').innerText = val + '%';
-          state.audioVolume = val / 100;
-          state.isSettingsDirty = true;
+      function renderChecklist(group, currentIdx) {
+        elements.checklistItems.innerHTML = EXERCISE_GROUPS[group].map((ex, i) => {
+          const done = state.completedExercises[`${group}-${i}`];
+          return `<div class="flex items-center space-x-3 px-4 py-2 rounded-lg ${i === currentIdx ? 'bg-white/10' : ''}">
+            <div class="w-5 h-5 rounded border-2 flex items-center justify-center ${done ? 'bg-white border-white' : 'border-white/30'}">
+              ${done ? '<img src="Icon/Checkmark.svg" class="w-4 h-4">' : ''}
+            </div>
+            <span class="text-sm ${done ? 'text-neutral-500 line-through' : i === currentIdx ? 'text-white' : 'text-neutral-400'}">${ex}</span>
+          </div>`;
+        }).join('');
       }
 
       function openSettings() {
-          state.isSettingsDirty = false;
-          elements.settingsModal.style.opacity = '1';
-          elements.settingsModal.style.pointerEvents = 'auto';
-          setTimeout(() => { elements.settingsPanel.style.transform = 'translateY(0)'; }, 10);
+        state.isSettingsDirty = false;
+        elements.settingsModal.style.opacity = '1';
+        elements.settingsModal.style.pointerEvents = 'auto';
+        elements.settingsPanel.style.transform = 'translateY(0)';
       }
 
       function closeSettings() {
-          if (state.isSettingsDirty && !confirm("Unsaved changes. Discard?")) return;
-          elements.settingsPanel.style.transform = 'translateY(100%)';
-          setTimeout(() => {
-              elements.settingsModal.style.opacity = '0';
-              elements.settingsModal.style.pointerEvents = 'none';
-          }, 300);
+        elements.settingsPanel.style.transform = 'translateY(100%)';
+        setTimeout(() => {
+          elements.settingsModal.style.opacity = '0';
+          elements.settingsModal.style.pointerEvents = 'none';
+        }, 300);
       }
 
-      function saveSettings() {
-          state.isSettingsDirty = false;
-          elements.settingsPanel.style.transform = 'translateY(100%)';
-          setTimeout(() => {
-              elements.settingsModal.style.opacity = '0';
-              elements.settingsModal.style.pointerEvents = 'none';
-          }, 300);
+      function saveSettings() { closeSettings(); }
+      function updateVolume(v) { 
+        state.audioVolume = v / 100;
+        document.getElementById('volume-display').innerText = v + '%';
       }
     </script>
   </body>
