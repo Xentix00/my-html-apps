@@ -1,0 +1,2262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Final Exam Practice Center</title>
+<style>
+  /* ===== RESET & ROOT ===== */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #060a12;
+    --surface: #0c1220;
+    --surface2: #111827;
+    --surface3: #1a2540;
+    --border: #1e2d47;
+    --border2: #253352;
+    --accent: #38bdf8;
+    --accent2: #0ea5e9;
+    --accent-dim: rgba(56,189,248,0.12);
+    --indigo: #818cf8;
+    --success: #34d399;
+    --success-dim: rgba(52,211,153,0.12);
+    --error: #f87171;
+    --error-dim: rgba(248,113,113,0.12);
+    --warning: #fbbf24;
+    --warning-dim: rgba(251,191,36,0.12);
+    --flag: #fb923c;
+    --flag-dim: rgba(251,146,60,0.15);
+    --text: #f1f5f9;
+    --text2: #94a3b8;
+    --text3: #64748b;
+    --radius: 10px;
+    --radius-lg: 16px;
+    --shadow: 0 4px 24px rgba(0,0,0,0.5);
+    --shadow-lg: 0 8px 48px rgba(0,0,0,0.6);
+    --font: 'SF Pro Display', 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+  }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font);
+    font-size: 15px;
+    line-height: 1.6;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+  /* ===== SCROLLBAR ===== */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+
+  /* ===== HEADER ===== */
+  #site-header {
+    position: sticky; top: 0; z-index: 100;
+    background: rgba(6,10,18,0.92);
+    backdrop-filter: blur(16px);
+    border-bottom: 1px solid var(--border);
+    padding: 0 20px;
+    display: flex; align-items: center; gap: 16px;
+    height: 60px;
+    box-shadow: 0 1px 20px rgba(0,0,0,0.4);
+  }
+  .site-logo {
+    font-size: 17px; font-weight: 700; color: var(--accent);
+    letter-spacing: -0.3px; white-space: nowrap;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .site-logo svg { flex-shrink: 0; }
+  .subject-tabs {
+    display: flex; gap: 4px; flex: 1;
+  }
+  .tab-btn {
+    padding: 7px 18px; border-radius: 8px; border: 1px solid transparent;
+    background: transparent; color: var(--text2); cursor: pointer;
+    font-size: 14px; font-weight: 500; font-family: var(--font);
+    transition: all 0.2s; white-space: nowrap;
+  }
+  .tab-btn:hover { background: var(--surface2); color: var(--text); }
+  .tab-btn.active {
+    background: var(--accent-dim); border-color: var(--accent);
+    color: var(--accent); font-weight: 600;
+  }
+  .header-timer {
+    display: flex; align-items: center; gap: 8px;
+    font-size: 13px; color: var(--text2); white-space: nowrap;
+  }
+  .timer-value {
+    font-size: 16px; font-weight: 700; color: var(--text);
+    font-variant-numeric: tabular-nums; letter-spacing: 0.5px;
+    min-width: 60px; text-align: right;
+  }
+  .timer-value.urgent { color: var(--error); animation: pulse 1s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.6} }
+
+  /* ===== MAIN LAYOUT ===== */
+  #main { max-width: 900px; margin: 0 auto; padding: 32px 20px 80px; }
+
+  /* ===== INTRO SCREEN ===== */
+  .intro-screen {
+    animation: fadeUp 0.4s ease;
+  }
+  @keyframes fadeUp {
+    from { opacity:0; transform:translateY(16px); }
+    to   { opacity:1; transform:translateY(0); }
+  }
+  .intro-hero {
+    text-align: center; padding: 48px 24px 32px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    margin-bottom: 24px;
+  }
+  .subject-badge {
+    display: inline-block;
+    padding: 6px 16px; border-radius: 20px;
+    font-size: 12px; font-weight: 700; letter-spacing: 1.5px;
+    text-transform: uppercase; margin-bottom: 16px;
+  }
+  .bio-badge  { background: rgba(52,211,153,0.15); color: var(--success); border: 1px solid rgba(52,211,153,0.3); }
+  .eng-badge  { background: rgba(129,140,248,0.15); color: var(--indigo); border: 1px solid rgba(129,140,248,0.3); }
+  .bib-badge  { background: rgba(251,191,36,0.15); color: var(--warning); border: 1px solid rgba(251,191,36,0.3); }
+  .intro-title { font-size: 30px; font-weight: 800; margin-bottom: 8px; letter-spacing: -0.5px; }
+  .intro-sub   { font-size: 15px; color: var(--text2); margin-bottom: 32px; }
+  .intro-stats {
+    display: flex; justify-content: center; gap: 32px; flex-wrap: wrap;
+    margin-bottom: 32px;
+  }
+  .stat-item { text-align: center; }
+  .stat-num { font-size: 28px; font-weight: 800; color: var(--accent); }
+  .stat-label { font-size: 12px; color: var(--text3); text-transform: uppercase; letter-spacing: 1px; }
+  .start-btn {
+    display: inline-flex; align-items: center; gap: 10px;
+    padding: 14px 40px; border-radius: var(--radius);
+    background: var(--accent); color: #020b12;
+    font-size: 16px; font-weight: 700; font-family: var(--font);
+    border: none; cursor: pointer; transition: all 0.2s;
+    box-shadow: 0 4px 20px rgba(56,189,248,0.35);
+  }
+  .start-btn:hover { background: var(--accent2); transform: translateY(-1px); box-shadow: 0 6px 28px rgba(56,189,248,0.45); }
+  .intro-instructions {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius-lg); padding: 28px;
+  }
+  .intro-instructions h3 { font-size: 16px; font-weight: 700; margin-bottom: 16px; color: var(--accent); }
+  .instruction-list { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+  .instruction-list li {
+    display: flex; align-items: flex-start; gap: 10px;
+    font-size: 14px; color: var(--text2);
+  }
+  .instruction-list li .icon { color: var(--accent); font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+
+  /* ===== EXAM SCREEN ===== */
+  .exam-screen { animation: fadeUp 0.3s ease; }
+  .exam-topbar {
+    position: sticky; top: 60px; z-index: 90;
+    background: rgba(6,10,18,0.92); backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+    padding: 12px 0; margin-bottom: 28px;
+  }
+  .progress-info {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 8px; font-size: 13px; color: var(--text2);
+  }
+  .progress-bar-track {
+    height: 5px; background: var(--surface3); border-radius: 3px; overflow: hidden;
+  }
+  .progress-bar-fill {
+    height: 100%; border-radius: 3px;
+    background: linear-gradient(90deg, var(--accent), var(--indigo));
+    transition: width 0.3s ease;
+  }
+
+  /* ===== QUESTION CARD ===== */
+  .question-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius-lg); padding: 28px;
+    margin-bottom: 16px; transition: border-color 0.2s;
+    position: relative;
+  }
+  .question-card.answered { border-color: var(--border2); }
+  .question-card.flagged { border-color: var(--flag); }
+  .question-card.flagged::before {
+    content: '';
+    position: absolute; top: 0; left: 0;
+    width: 4px; height: 100%; border-radius: var(--radius-lg) 0 0 var(--radius-lg);
+    background: var(--flag);
+  }
+  .q-header {
+    display: flex; justify-content: space-between; align-items: flex-start;
+    margin-bottom: 14px; gap: 12px;
+  }
+  .q-number {
+    font-size: 11px; font-weight: 700; letter-spacing: 1.5px;
+    text-transform: uppercase; color: var(--text3); flex-shrink: 0;
+  }
+  .q-type-badge {
+    font-size: 10px; font-weight: 700; letter-spacing: 1px;
+    text-transform: uppercase; padding: 3px 8px; border-radius: 4px;
+  }
+  .q-type-mc { background: var(--accent-dim); color: var(--accent); }
+  .q-type-tf { background: rgba(129,140,248,0.12); color: var(--indigo); }
+  .q-header-right { display: flex; align-items: center; gap: 8px; }
+  .flag-btn {
+    display: flex; align-items: center; gap: 5px;
+    padding: 5px 10px; border-radius: 6px; border: 1px solid var(--border2);
+    background: transparent; color: var(--text3); cursor: pointer;
+    font-size: 12px; font-family: var(--font); transition: all 0.2s;
+  }
+  .flag-btn:hover { border-color: var(--flag); color: var(--flag); background: var(--flag-dim); }
+  .flag-btn.flagged { border-color: var(--flag); color: var(--flag); background: var(--flag-dim); font-weight: 600; }
+  .q-text { font-size: 16px; font-weight: 500; margin-bottom: 20px; line-height: 1.6; }
+  .q-options { display: flex; flex-direction: column; gap: 10px; }
+  .option-label {
+    display: flex; align-items: flex-start; gap: 12px;
+    padding: 14px 16px; border-radius: 10px;
+    border: 1px solid var(--border); background: var(--surface2);
+    cursor: pointer; transition: all 0.2s; user-select: none;
+  }
+  .option-label:hover { border-color: var(--border2); background: var(--surface3); }
+  .option-label input[type="radio"] { display: none; }
+  .option-indicator {
+    width: 20px; height: 20px; border-radius: 50%;
+    border: 2px solid var(--border2); background: transparent;
+    flex-shrink: 0; transition: all 0.2s; margin-top: 1px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .option-label input:checked ~ .option-indicator {
+    border-color: var(--accent); background: var(--accent);
+  }
+  .option-label input:checked ~ .option-indicator::after {
+    content: ''; width: 8px; height: 8px; border-radius: 50%;
+    background: #020b12; display: block;
+  }
+  .option-label:has(input:checked) {
+    border-color: var(--accent); background: var(--accent-dim);
+  }
+  .option-text { font-size: 14px; line-height: 1.55; }
+
+  /* ===== QUESTION NAV (floating dot panel) ===== */
+  #q-nav-panel {
+    position: fixed; right: 20px; top: 50%;
+    transform: translateY(-50%);
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius-lg); padding: 16px; z-index: 80;
+    max-height: 70vh; overflow-y: auto;
+    box-shadow: var(--shadow-lg);
+    width: 220px;
+    display: none;
+  }
+  #q-nav-panel.visible { display: block; }
+  .q-nav-title { font-size: 11px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--text3); margin-bottom: 12px; }
+  .q-dots { display: flex; flex-wrap: wrap; gap: 6px; }
+  .q-dot {
+    width: 30px; height: 30px; border-radius: 6px;
+    border: 1px solid var(--border); background: var(--surface2);
+    font-size: 11px; font-weight: 600; color: var(--text3);
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; transition: all 0.15s;
+  }
+  .q-dot:hover { border-color: var(--accent); color: var(--accent); }
+  .q-dot.answered { background: rgba(56,189,248,0.15); border-color: var(--accent); color: var(--accent); }
+  .q-dot.flagged  { background: var(--flag-dim); border-color: var(--flag); color: var(--flag); }
+  .q-dot.answered.flagged { background: var(--flag-dim); border-color: var(--flag); color: var(--flag); }
+  .nav-legend { display: flex; flex-direction: column; gap: 5px; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border); }
+  .legend-item { display: flex; align-items: center; gap: 8px; font-size: 11px; color: var(--text3); }
+  .legend-dot { width: 12px; height: 12px; border-radius: 3px; flex-shrink: 0; }
+  .legend-dot.ans  { background: rgba(56,189,248,0.4); border: 1px solid var(--accent); }
+  .legend-dot.flg  { background: var(--flag-dim); border: 1px solid var(--flag); }
+  .legend-dot.una  { background: var(--surface3); border: 1px solid var(--border); }
+
+  /* ===== EXAM FOOTER ===== */
+  .exam-footer { padding: 32px 0 0; display: flex; justify-content: center; }
+  .finish-btn {
+    display: inline-flex; align-items: center; gap: 10px;
+    padding: 16px 48px; border-radius: var(--radius);
+    background: linear-gradient(135deg, #ef4444, #dc2626);
+    color: #fff; font-size: 16px; font-weight: 700;
+    font-family: var(--font); border: none; cursor: pointer;
+    transition: all 0.2s; box-shadow: 0 4px 20px rgba(239,68,68,0.35);
+  }
+  .finish-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 32px rgba(239,68,68,0.45); }
+
+  /* ===== MODAL ===== */
+  .modal-overlay {
+    position: fixed; inset: 0; z-index: 200;
+    background: rgba(0,0,0,0.75); backdrop-filter: blur(4px);
+    display: flex; align-items: center; justify-content: center;
+    padding: 20px; animation: fadeIn 0.2s ease;
+  }
+  @keyframes fadeIn { from{opacity:0} to{opacity:1} }
+  .modal-box {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius-lg); padding: 32px; max-width: 480px; width: 100%;
+    box-shadow: var(--shadow-lg); animation: scaleIn 0.2s ease;
+  }
+  @keyframes scaleIn { from{transform:scale(0.94);opacity:0} to{transform:scale(1);opacity:1} }
+  .modal-title { font-size: 20px; font-weight: 800; margin-bottom: 8px; }
+  .modal-body  { font-size: 14px; color: var(--text2); margin-bottom: 24px; line-height: 1.65; }
+  .modal-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 24px; }
+  .modal-stat  { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 12px; text-align: center; }
+  .modal-stat .n { font-size: 22px; font-weight: 800; }
+  .modal-stat .l { font-size: 11px; color: var(--text3); text-transform: uppercase; letter-spacing: 1px; }
+  .modal-stat.warn .n { color: var(--warning); }
+  .modal-stat.ok   .n { color: var(--success); }
+  .modal-actions { display: flex; gap: 10px; justify-content: flex-end; }
+  .btn-secondary {
+    padding: 10px 20px; border-radius: 8px;
+    border: 1px solid var(--border); background: transparent;
+    color: var(--text2); cursor: pointer; font-size: 14px; font-family: var(--font);
+    transition: all 0.2s;
+  }
+  .btn-secondary:hover { border-color: var(--border2); color: var(--text); }
+  .btn-danger {
+    padding: 10px 24px; border-radius: 8px;
+    background: #ef4444; border: none; color: #fff;
+    cursor: pointer; font-size: 14px; font-weight: 600; font-family: var(--font);
+    transition: all 0.2s;
+  }
+  .btn-danger:hover { background: #dc2626; }
+
+  /* ===== RESULTS SCREEN ===== */
+  .results-screen { animation: fadeUp 0.4s ease; }
+  .results-hero {
+    text-align: center; padding: 48px 24px 36px;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius-lg); margin-bottom: 24px;
+  }
+  .grade-circle {
+    width: 110px; height: 110px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 20px;
+    font-size: 36px; font-weight: 900;
+    border: 4px solid;
+  }
+  .grade-A { border-color: var(--success); color: var(--success); background: rgba(52,211,153,0.1); }
+  .grade-B { border-color: var(--accent); color: var(--accent); background: var(--accent-dim); }
+  .grade-C { border-color: var(--warning); color: var(--warning); background: var(--warning-dim); }
+  .grade-D, .grade-F { border-color: var(--error); color: var(--error); background: var(--error-dim); }
+  .results-score { font-size: 22px; font-weight: 700; margin-bottom: 4px; }
+  .results-sub   { font-size: 14px; color: var(--text2); }
+  .results-stats-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 12px; margin-top: 28px;
+  }
+  .r-stat {
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 16px; text-align: center;
+  }
+  .r-stat .n { font-size: 22px; font-weight: 800; color: var(--accent); }
+  .r-stat .l { font-size: 11px; color: var(--text3); text-transform: uppercase; letter-spacing: 1px; margin-top: 2px; }
+  .review-section { margin-top: 16px; }
+  .review-title { font-size: 20px; font-weight: 800; margin-bottom: 16px; }
+  .review-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius-lg); padding: 24px; margin-bottom: 12px;
+    animation: fadeUp 0.3s ease;
+  }
+  .review-card.correct { border-left: 4px solid var(--success); }
+  .review-card.incorrect { border-left: 4px solid var(--error); }
+  .review-q-num { font-size: 11px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--text3); margin-bottom: 8px; }
+  .review-q-text { font-size: 15px; font-weight: 500; margin-bottom: 14px; }
+  .review-answers { display: flex; flex-direction: column; gap: 6px; margin-bottom: 12px; }
+  .review-ans {
+    display: flex; align-items: center; gap: 8px;
+    padding: 8px 12px; border-radius: 8px; font-size: 13px;
+  }
+  .review-ans.user-correct { background: var(--success-dim); border: 1px solid rgba(52,211,153,0.3); color: var(--success); }
+  .review-ans.user-wrong   { background: var(--error-dim);   border: 1px solid rgba(248,113,113,0.3); color: var(--error); }
+  .review-ans.show-correct { background: var(--success-dim); border: 1px solid rgba(52,211,153,0.3); color: var(--success); }
+  .review-ans.unanswered   { background: var(--surface2); border: 1px solid var(--border); color: var(--text3); }
+  .review-explanation {
+    padding: 10px 14px; border-radius: 8px;
+    background: rgba(56,189,248,0.07); border: 1px solid rgba(56,189,248,0.15);
+    font-size: 13px; color: var(--text2); line-height: 1.6;
+  }
+  .review-explanation strong { color: var(--accent); }
+  .retake-btn {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 13px 32px; border-radius: var(--radius);
+    background: var(--accent); color: #020b12;
+    font-size: 15px; font-weight: 700; font-family: var(--font);
+    border: none; cursor: pointer; transition: all 0.2s;
+    box-shadow: 0 4px 20px rgba(56,189,248,0.3);
+    margin-top: 28px;
+  }
+  .retake-btn:hover { background: var(--accent2); }
+
+  /* ===== RESPONSIVE ===== */
+  @media (min-width: 1100px) { #q-nav-panel.visible { display: block; } }
+  @media (max-width: 640px) {
+    #site-header { gap: 8px; padding: 0 12px; }
+    .site-logo span { display: none; }
+    .tab-btn { padding: 6px 12px; font-size: 13px; }
+    .intro-stats { gap: 16px; }
+    .stat-num { font-size: 22px; }
+    #main { padding: 20px 12px 60px; }
+    .question-card { padding: 20px; }
+    .q-text { font-size: 15px; }
+    .results-stats-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+  @media (max-width: 400px) {
+    .tab-btn { padding: 5px 8px; font-size: 12px; }
+  }
+
+  /* ===== UTILITY ===== */
+  .hidden { display: none !important; }
+  .text-success { color: var(--success); }
+  .text-error   { color: var(--error); }
+  .text-warning { color: var(--warning); }
+  .text-accent  { color: var(--accent); }
+</style>
+
+    <link rel="manifest" href="manifest.json">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="FCCS Practice">
+    <link rel="apple-touch-icon" href="icon.png">
+    <script>if('serviceWorker' in navigator){navigator.serviceWorker.register('sw.js');}</script>
+</head>
+<body>
+
+<!-- ===== HEADER ===== -->
+<header id="site-header">
+  <div class="site-logo">
+    <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+      <rect x="1" y="1" width="20" height="20" rx="5" stroke="#38bdf8" stroke-width="1.5"/>
+      <path d="M6 11h10M11 6v10" stroke="#38bdf8" stroke-width="1.5" stroke-linecap="round"/>
+    </svg>
+    <span>Exam Prep</span>
+  </div>
+  <nav class="subject-tabs">
+    <button class="tab-btn active" data-subject="biology">Biology</button>
+    <button class="tab-btn" data-subject="english">English</button>
+    <button class="tab-btn" data-subject="bible">Bible</button>
+  </nav>
+  <div class="header-timer hidden" id="header-timer">
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+      <circle cx="8" cy="9" r="6" stroke="#94a3b8" stroke-width="1.3"/>
+      <path d="M8 6v3l2 1.5" stroke="#94a3b8" stroke-width="1.3" stroke-linecap="round"/>
+      <path d="M6 2h4" stroke="#94a3b8" stroke-width="1.3" stroke-linecap="round"/>
+    </svg>
+    <span class="timer-value" id="timer-display">2:00:00</span>
+  </div>
+</header>
+
+<!-- ===== QUESTION NAVIGATOR PANEL ===== -->
+<div id="q-nav-panel">
+  <div class="q-nav-title">Questions</div>
+  <div class="q-dots" id="q-dots"></div>
+  <div class="nav-legend">
+    <div class="legend-item"><div class="legend-dot ans"></div>Answered</div>
+    <div class="legend-item"><div class="legend-dot flg"></div>Flagged</div>
+    <div class="legend-item"><div class="legend-dot una"></div>Unanswered</div>
+  </div>
+</div>
+
+<!-- ===== MAIN ===== -->
+<main id="main">
+  <div id="content-area"></div>
+</main>
+
+<!-- ===== MODAL ===== -->
+<div class="modal-overlay hidden" id="modal-overlay">
+  <div class="modal-box" id="modal-box">
+    <div class="modal-title" id="modal-title"></div>
+    <div class="modal-body" id="modal-body"></div>
+    <div class="modal-stats hidden" id="modal-stats"></div>
+    <div class="modal-actions" id="modal-actions"></div>
+  </div>
+</div>
+
+<script>
+/* =========================================================
+   DATA: ALL EXAM QUESTIONS
+   ========================================================= */
+
+const EXAM_DATA = {
+
+  // -------------------------------------------------------
+  // BIOLOGY – 42 questions
+  // -------------------------------------------------------
+  biology: {
+    name: 'Biology',
+    badgeClass: 'bio-badge',
+    badgeText: 'Biology',
+    timeLimit: 7200,
+    questions: [
+      // Plant Structure & Function
+      {
+        q: 'What process do plants use to produce their own food?',
+        type: 'mc',
+        options: ['Respiration','Photosynthesis','Fermentation','Digestion'],
+        answer: 'Photosynthesis',
+        exp: 'Plants perform photosynthesis, using sunlight, water, and carbon dioxide to produce glucose.'
+      },
+      {
+        q: 'Which part of the flower is the female reproductive organ?',
+        type: 'mc',
+        options: ['Stamen','Anther','Pistil','Sepal'],
+        answer: 'Pistil',
+        exp: 'The pistil is the female reproductive organ of the flower, consisting of the stigma, style, and ovary.'
+      },
+      {
+        q: 'Which part of the flower is the male reproductive organ?',
+        type: 'mc',
+        options: ['Pistil','Stigma','Ovary','Stamen'],
+        answer: 'Stamen',
+        exp: 'The stamen is the male reproductive organ, consisting of the anther (which produces pollen) and the filament.'
+      },
+      {
+        q: 'What is the main function of roots in a plant?',
+        type: 'mc',
+        options: ['Produce food through photosynthesis','Anchor the plant and absorb water and nutrients','Transport food to the leaves','Attract pollinators'],
+        answer: 'Anchor the plant and absorb water and nutrients',
+        exp: 'Roots anchor the plant in the soil and absorb water and minerals needed for plant functions.'
+      },
+      {
+        q: 'Which microscopic structure on roots helps absorb water from the soil?',
+        type: 'mc',
+        options: ['Stomata','Chloroplasts','Root hairs','Guard cells'],
+        answer: 'Root hairs',
+        exp: 'Root hairs are tiny extensions of root cells that greatly increase the surface area available for water and mineral absorption.'
+      },
+      {
+        q: 'What type of root system is commonly found in grasses?',
+        type: 'mc',
+        options: ['Taproot system','Aerial root system','Fibrous root system','Prop root system'],
+        answer: 'Fibrous root system',
+        exp: 'Grasses have a fibrous root system, which consists of many small roots spreading out in all directions rather than one large central root.'
+      },
+      {
+        q: 'Which of the following best describes the difference between pollination and fertilization?',
+        type: 'mc',
+        options: [
+          'Pollination is the fusion of egg and sperm; fertilization is pollen transfer',
+          'Pollination is the transfer of pollen to the stigma; fertilization is the fusion of egg and sperm inside the ovary',
+          'They describe the same process',
+          'Pollination occurs underground; fertilization occurs above ground'
+        ],
+        answer: 'Pollination is the transfer of pollen to the stigma; fertilization is the fusion of egg and sperm inside the ovary',
+        exp: 'Pollination happens first — pollen moves to the stigma. Fertilization occurs later when the sperm cell fuses with the egg inside the ovary.'
+      },
+      {
+        q: 'Which type of plant stem is soft, green, and non-woody?',
+        type: 'mc',
+        options: ['Woody stem','Herbaceous stem','Tuberous stem','Rhizome'],
+        answer: 'Herbaceous stem',
+        exp: 'Herbaceous stems are soft, green, and flexible, while woody stems are hard and rigid due to lignin deposits.'
+      },
+      {
+        q: 'True or False: The fibrous root system is most commonly found in large trees and shrubs.',
+        type: 'tf',
+        options: ['True','False'],
+        answer: 'False',
+        exp: 'Fibrous root systems are characteristic of grasses. Large trees and many shrubs typically have taproot systems with one dominant central root.'
+      },
+      // Skeletal & Muscular
+      {
+        q: 'What are the two main divisions of the human skeletal system?',
+        type: 'mc',
+        options: ['Muscular and bony','Axial and Appendicular','Central and Peripheral','Upper and Lower'],
+        answer: 'Axial and Appendicular',
+        exp: 'The axial skeleton includes the skull, vertebral column, and rib cage. The appendicular skeleton includes the limbs and girdles.'
+      },
+      {
+        q: 'Which of the following structures belongs to the AXIAL skeleton?',
+        type: 'mc',
+        options: ['Arms and legs','Hands and feet','Skull, vertebral column, and rib cage','Pelvis and shoulder girdle'],
+        answer: 'Skull, vertebral column, and rib cage',
+        exp: 'The axial skeleton forms the central axis of the body: skull, vertebral column (spine), and thoracic cage (ribs and sternum).'
+      },
+      {
+        q: 'Which type of bone tissue is dense, hard, and provides structural strength?',
+        type: 'mc',
+        options: ['Spongy bone','Compact bone','Cartilage','Marrow'],
+        answer: 'Compact bone',
+        exp: 'Compact (cortical) bone is the dense outer layer of bone that provides strength and protection. Spongy bone is lighter and found in the interior.'
+      },
+      {
+        q: 'What type of connective tissue connects bones to other bones?',
+        type: 'mc',
+        options: ['Tendons','Cartilage','Ligaments','Fascia'],
+        answer: 'Ligaments',
+        exp: 'Ligaments are tough, fibrous connective tissues that connect bone to bone at joints, providing stability.'
+      },
+      {
+        q: 'What type of connective tissue connects muscle to bone?',
+        type: 'mc',
+        options: ['Ligaments','Cartilage','Tendons','Synovial membrane'],
+        answer: 'Tendons',
+        exp: 'Tendons are strong, fibrous cords that attach muscle to bone, allowing muscle contractions to move the skeleton.'
+      },
+      {
+        q: 'Which type of muscle is voluntary and directly attached to bones?',
+        type: 'mc',
+        options: ['Smooth muscle','Cardiac muscle','Skeletal muscle','Visceral muscle'],
+        answer: 'Skeletal muscle',
+        exp: 'Skeletal muscle is the only voluntary muscle type, meaning we consciously control it. It is attached to bones and enables movement.'
+      },
+      {
+        q: 'Which type of muscle is found exclusively in the heart?',
+        type: 'mc',
+        options: ['Smooth muscle','Skeletal muscle','Cardiac muscle','Voluntary muscle'],
+        answer: 'Cardiac muscle',
+        exp: 'Cardiac muscle is unique to the heart. It is involuntary (we cannot consciously control it) and contracts rhythmically throughout a person\'s life.'
+      },
+      {
+        q: 'Which type of muscle is found in the walls of the stomach and intestines?',
+        type: 'mc',
+        options: ['Cardiac muscle','Skeletal muscle','Voluntary muscle','Smooth muscle'],
+        answer: 'Smooth muscle',
+        exp: 'Smooth muscle lines the walls of hollow organs like the stomach, intestines, and blood vessels. It is involuntary and produces slow, sustained contractions.'
+      },
+      {
+        q: 'True or False: Tendons connect bones to other bones.',
+        type: 'tf',
+        options: ['True','False'],
+        answer: 'False',
+        exp: 'Ligaments connect bone to bone. Tendons connect muscle to bone. This is a common point of confusion.'
+      },
+      {
+        q: 'What is the primary function of the muscular system?',
+        type: 'mc',
+        options: ['Produce blood cells','Enable movement of the body','Filter toxins from the blood','Regulate body temperature'],
+        answer: 'Enable movement of the body',
+        exp: 'The main function of the muscular system is to produce movement — of the body, organs, and substances within the body.'
+      },
+      // Circulatory System
+      {
+        q: 'What is the primary function of the circulatory system?',
+        type: 'mc',
+        options: [
+          'Break down food for energy',
+          'Remove waste gases from the lungs',
+          'Transport blood, oxygen, and nutrients throughout the body',
+          'Coordinate voluntary body movements'
+        ],
+        answer: 'Transport blood, oxygen, and nutrients throughout the body',
+        exp: 'The circulatory system\'s main job is to transport blood carrying oxygen, nutrients, hormones, and waste products throughout the body.'
+      },
+      {
+        q: 'What are the upper chambers of the heart called?',
+        type: 'mc',
+        options: ['Ventricles','Atria','Valves','Septa'],
+        answer: 'Atria',
+        exp: 'The heart has two upper chambers called atria (singular: atrium) that receive blood. The two lower chambers are called ventricles, which pump blood out.'
+      },
+      {
+        q: 'What is the largest artery in the human body?',
+        type: 'mc',
+        options: ['Pulmonary artery','Femoral artery','Carotid artery','Aorta'],
+        answer: 'Aorta',
+        exp: 'The aorta is the largest artery, carrying oxygen-rich blood directly from the left ventricle of the heart to distribute it throughout the body.'
+      },
+      {
+        q: 'Which blood component is primarily responsible for carrying oxygen?',
+        type: 'mc',
+        options: ['White blood cells','Platelets','Plasma','Red blood cells'],
+        answer: 'Red blood cells',
+        exp: 'Red blood cells (erythrocytes) contain hemoglobin, a protein that binds to oxygen and carries it from the lungs to the body\'s tissues.'
+      },
+      {
+        q: 'In which blood component is hemoglobin found?',
+        type: 'mc',
+        options: ['Plasma','Platelets','White blood cells','Red blood cells'],
+        answer: 'Red blood cells',
+        exp: 'Hemoglobin is the iron-containing protein found inside red blood cells that gives them their red color and enables them to carry oxygen.'
+      },
+      {
+        q: 'What is the shape of a red blood cell?',
+        type: 'mc',
+        options: ['Perfectly spherical','Irregular/amoeba-like','Biconcave disc','Rod-shaped'],
+        answer: 'Biconcave disc',
+        exp: 'Red blood cells have a distinctive biconcave disc shape — they are round, flat, and depressed in the middle on both sides. This shape increases surface area for gas exchange.'
+      },
+      {
+        q: 'A person with blood type A has which antigens on their red blood cells?',
+        type: 'mc',
+        options: ['B antigens only','A antigens only','Both A and B antigens','No antigens'],
+        answer: 'A antigens only',
+        exp: 'Blood type is determined by antigens on red blood cells. Type A has A antigens, Type B has B antigens, Type AB has both, and Type O has neither.'
+      },
+      {
+        q: 'True or False: White blood cells have the same biconcave shape as red blood cells.',
+        type: 'tf',
+        options: ['True','False'],
+        answer: 'False',
+        exp: 'White blood cells (leukocytes) are irregular/amoeba-like in shape with visible nuclei. Red blood cells are biconcave discs and have no nucleus.'
+      },
+      // Respiratory System
+      {
+        q: 'What is the main waste gas removed from the body by the respiratory system?',
+        type: 'mc',
+        options: ['Oxygen','Nitrogen','Carbon dioxide','Methane'],
+        answer: 'Carbon dioxide',
+        exp: 'The respiratory system removes carbon dioxide, a waste product of cellular respiration, through the process of exhalation via the lungs.'
+      },
+      {
+        q: 'What is the term for the process of inhaling and exhaling air?',
+        type: 'mc',
+        options: ['Digestion','Circulation','Breathing (ventilation)','Transpiration'],
+        answer: 'Breathing (ventilation)',
+        exp: 'Breathing, also called ventilation or pulmonary ventilation, is the mechanical process of moving air into and out of the lungs.'
+      },
+      {
+        q: 'Which group of organs and structures belongs to the respiratory system?',
+        type: 'mc',
+        options: [
+          'Liver and kidneys',
+          'Stomach and intestines',
+          'Lungs, trachea, and bronchi',
+          'Heart and blood vessels'
+        ],
+        answer: 'Lungs, trachea, and bronchi',
+        exp: 'The respiratory system includes the lungs, trachea (windpipe), bronchi, bronchioles, diaphragm, and nasal passages.'
+      },
+      // Ecology
+      {
+        q: 'What is the primary energy source for most producers in an ecosystem?',
+        type: 'mc',
+        options: ['Water','Carbon dioxide','Sunlight','Soil minerals'],
+        answer: 'Sunlight',
+        exp: 'Most producers (plants and algae) capture energy from sunlight through photosynthesis to make their own food.'
+      },
+      {
+        q: 'Which of the following best defines a producer in ecology?',
+        type: 'mc',
+        options: [
+          'An organism that consumes other organisms for energy',
+          'An organism that decomposes dead organic matter',
+          'An organism that produces its own food, such as a plant',
+          'An organism that eats only meat'
+        ],
+        answer: 'An organism that produces its own food, such as a plant',
+        exp: 'Producers (autotrophs) make their own food using energy from sunlight or chemicals. Examples include plants, algae, and some bacteria.'
+      },
+      {
+        q: 'What is the role of decomposers in an ecosystem?',
+        type: 'mc',
+        options: [
+          'Convert sunlight into chemical energy',
+          'Hunt and consume prey animals',
+          'Break down dead organic matter and recycle nutrients back into the environment',
+          'Produce oxygen for other organisms'
+        ],
+        answer: 'Break down dead organic matter and recycle nutrients back into the environment',
+        exp: 'Decomposers (fungi, bacteria) break down dead plants and animals, releasing nutrients back into the soil for producers to use.'
+      },
+      {
+        q: 'Which of the following is an example of a BIOTIC factor in an ecosystem?',
+        type: 'mc',
+        options: ['Temperature','Amount of rainfall','Rock type in the soil','A tree in the forest'],
+        answer: 'A tree in the forest',
+        exp: 'A biotic factor is any living component of an ecosystem. A tree, animal, or bacteria are biotic. Temperature, rainfall, and rocks are abiotic (non-living) factors.'
+      },
+      {
+        q: 'What is a "population" in ecological terms?',
+        type: 'mc',
+        options: [
+          'All living things in a given area',
+          'All members of the same species living in a particular area',
+          'The physical environment of a habitat',
+          'The full food web of an ecosystem'
+        ],
+        answer: 'All members of the same species living in a particular area',
+        exp: 'A population consists of all individuals of the same species living in the same area at the same time. Multiple populations make up a community.'
+      },
+      {
+        q: 'Which ecological relationship benefits BOTH organisms involved?',
+        type: 'mc',
+        options: ['Parasitism','Commensalism','Mutualism','Predation'],
+        answer: 'Mutualism',
+        exp: 'Mutualism is a symbiotic relationship in which both species benefit, such as bees and flowers (bee gets nectar; flower gets pollinated).'
+      },
+      {
+        q: 'What is the correct order of ecological organization from SMALLEST to LARGEST?',
+        type: 'mc',
+        options: [
+          'Community → Population → Ecosystem → Organism',
+          'Organism → Population → Community → Ecosystem',
+          'Ecosystem → Community → Population → Organism',
+          'Population → Organism → Ecosystem → Community'
+        ],
+        answer: 'Organism → Population → Community → Ecosystem',
+        exp: 'The hierarchy goes: Individual Organism → Population (same species) → Community (all populations in an area) → Ecosystem (community + physical environment).'
+      },
+      // Disease & Microbiology
+      {
+        q: 'Which of the following is an example of an INFECTIOUS disease?',
+        type: 'mc',
+        options: ['Diabetes','Influenza (the flu)','Cancer','Heart disease'],
+        answer: 'Influenza (the flu)',
+        exp: 'An infectious disease is caused by pathogens (bacteria, viruses, fungi) and can spread from person to person. The flu is caused by the influenza virus.'
+      },
+      {
+        q: 'Which of the following is an example of a NON-INFECTIOUS disease?',
+        type: 'mc',
+        options: ['Tuberculosis','Chickenpox','Diabetes','COVID-19'],
+        answer: 'Diabetes',
+        exp: 'Non-infectious diseases cannot be spread from person to person. Diabetes is caused by internal factors (genetics, lifestyle), not pathogens.'
+      },
+      {
+        q: 'What are the three shapes (morphologies) of bacteria?',
+        type: 'mc',
+        options: [
+          'Circular, triangular, and square',
+          'Cocci (spherical), bacilli (rod-shaped), and spirilla (spiral)',
+          'Flat, curved, and pointed',
+          'Round, long, and branched'
+        ],
+        answer: 'Cocci (spherical), bacilli (rod-shaped), and spirilla (spiral)',
+        exp: 'Bacteria are classified by shape: cocci (sphere), bacilli (rod), and spirilla (spiral/corkscrew). These shapes are a basic tool in bacterial identification.'
+      },
+      {
+        q: 'What is the key difference between an epidemic and a pandemic?',
+        type: 'mc',
+        options: [
+          'An epidemic affects one person; a pandemic affects a city',
+          'An epidemic is confined to a region; a pandemic spreads across multiple countries or worldwide',
+          'A pandemic is less severe than an epidemic',
+          'They mean the same thing'
+        ],
+        answer: 'An epidemic is confined to a region; a pandemic spreads across multiple countries or worldwide',
+        exp: 'An epidemic is a disease outbreak limited to a region or community. A pandemic is when that disease spreads globally across multiple countries.'
+      },
+      {
+        q: 'What is herd immunity?',
+        type: 'mc',
+        options: [
+          'When all animals in a herd are vaccinated at once',
+          'When a large enough portion of a population becomes immune to a disease, limiting its spread',
+          'When the immune system attacks the body\'s own cells',
+          'When a disease spreads through a herd of animals to humans'
+        ],
+        answer: 'When a large enough portion of a population becomes immune to a disease, limiting its spread',
+        exp: 'Herd immunity (community immunity) occurs when enough people are immune—through vaccination or prior infection—that disease spread slows dramatically, protecting those who cannot be vaccinated.'
+      },
+      {
+        q: 'Which statement best distinguishes a VIRUS from BACTERIA?',
+        type: 'mc',
+        options: [
+          'Bacteria are smaller than viruses',
+          'Viruses cannot reproduce on their own and require a host cell; bacteria are living single-celled organisms that can reproduce independently',
+          'Bacteria require a living host cell to reproduce; viruses do not',
+          'Viruses can be treated with antibiotics; bacteria cannot'
+        ],
+        answer: 'Viruses cannot reproduce on their own and require a host cell; bacteria are living single-celled organisms that can reproduce independently',
+        exp: 'Bacteria are living cells that reproduce on their own (binary fission) and can be killed by antibiotics. Viruses are not living cells—they need to hijack a host cell to replicate and are not affected by antibiotics.'
+      },
+      // Digestive System
+      {
+        q: 'What is the primary organ of nutrient absorption and digestion?',
+        type: 'mc',
+        options: ['Stomach','Large intestine','Small intestine','Liver'],
+        answer: 'Small intestine',
+        exp: 'The small intestine is the main site of both chemical digestion and nutrient absorption. Its inner surface has villi and microvilli to maximize absorption surface area.'
+      },
+      {
+        q: 'Which organ produces the hormone insulin?',
+        type: 'mc',
+        options: ['Liver','Stomach','Gallbladder','Pancreas'],
+        answer: 'Pancreas',
+        exp: 'The pancreas has two functions: it produces digestive enzymes (exocrine function) and produces hormones like insulin to regulate blood sugar (endocrine function).'
+      },
+      {
+        q: 'What is the name for the wave-like muscular contractions that move food through the digestive tract?',
+        type: 'mc',
+        options: ['Diffusion','Osmosis','Peristalsis','Segmentation'],
+        answer: 'Peristalsis',
+        exp: 'Peristalsis is a series of wave-like muscle contractions that move food through the esophagus, stomach, and intestines.'
+      },
+      {
+        q: 'Which of the following is NOT produced or released by the salivary glands?',
+        type: 'mc',
+        options: ['Saliva','Salivary amylase','Bile','Mucus'],
+        answer: 'Bile',
+        exp: 'Salivary glands produce saliva (which contains water), salivary amylase (a digestive enzyme), and mucus. Bile is produced by the liver and stored in the gallbladder, not the salivary glands.'
+      },
+      {
+        q: 'What is the function of the gallbladder?',
+        type: 'mc',
+        options: [
+          'Produce digestive enzymes for the small intestine',
+          'Store and release bile to aid in fat digestion',
+          'Absorb water from undigested food',
+          'Produce insulin for blood sugar regulation'
+        ],
+        answer: 'Store and release bile to aid in fat digestion',
+        exp: 'The gallbladder stores bile produced by the liver and releases it into the small intestine when fats are present, helping to break them down (emulsification).'
+      },
+      {
+        q: 'True or False: The large intestine is the primary site of nutrient absorption in the digestive system.',
+        type: 'tf',
+        options: ['True','False'],
+        answer: 'False',
+        exp: 'The small intestine is the primary site of nutrient absorption. The large intestine mainly absorbs water and electrolytes, compacting waste into feces.'
+      }
+    ]
+  },
+
+  // -------------------------------------------------------
+  // ENGLISH – 44 questions
+  // -------------------------------------------------------
+  english: {
+    name: 'English',
+    badgeClass: 'eng-badge',
+    badgeText: 'English',
+    timeLimit: 7200,
+    questions: [
+      // Miss Hinch
+      {
+        q: 'In "Miss Hinch," what ultimately happens to the reporter Jessie Dark at the end of the story?',
+        type: 'mc',
+        options: [
+          'She escapes and lives in hiding',
+          'She is killed, but succeeds in capturing Miss Hinch',
+          'She captures Miss Hinch without injury',
+          'She retires without solving the case'
+        ],
+        answer: 'She is killed, but succeeds in capturing Miss Hinch',
+        exp: 'The reporter Jessie Dark is killed at the end of "Miss Hinch," but she does accomplish her goal of capturing Miss Hinch.'
+      },
+      {
+        q: 'In what city is the short story "Miss Hinch" set?',
+        type: 'mc',
+        options: ['Chicago','Boston','New York City','Philadelphia'],
+        answer: 'New York City',
+        exp: '"Miss Hinch" is set in New York City.'
+      },
+      {
+        q: 'What is the name of the reporter character in "Miss Hinch"?',
+        type: 'mc',
+        options: ['Jane Morris','Mary Brown','Jessie Dark','Clara Wade'],
+        answer: 'Jessie Dark',
+        exp: 'The reporter in "Miss Hinch" is named Jessie Dark.'
+      },
+      // Top Man
+      {
+        q: 'In what country is the short story "Top Man" primarily set?',
+        type: 'mc',
+        options: ['Nepal','India','Pakistan','Afghanistan'],
+        answer: 'Pakistan',
+        exp: '"Top Man" is set in Pakistan, involving a mountain-climbing expedition.'
+      },
+      {
+        q: 'What happens to the character Osbourne in "Top Man"?',
+        type: 'mc',
+        options: [
+          'He reaches the summit and is celebrated',
+          'He falls and dies on the mountain',
+          'He does not die during the climb',
+          'He abandons the team at base camp'
+        ],
+        answer: 'He does not die during the climb',
+        exp: 'Osbourne survives the climb in "Top Man" — he does not die.'
+      },
+      {
+        q: 'Which conflict themes are present in "Top Man"?',
+        type: 'mc',
+        options: [
+          'Man vs. Technology only',
+          'Man vs. Nature, Man vs. Self, and Man vs. Man',
+          'Man vs. Society and Man vs. Fate',
+          'Man vs. Nature only'
+        ],
+        answer: 'Man vs. Nature, Man vs. Self, and Man vs. Man',
+        exp: '"Top Man" features all three major conflict types: Man vs. Nature (the mountain/weather), Man vs. Self (internal struggles), and Man vs. Man (conflicts between climbers).'
+      },
+      {
+        q: 'What object is left behind on the mountain at the end of "Top Man"?',
+        type: 'mc',
+        options: ['A base camp flag','A rope coil','Nance\'s Axe','A climbing helmet'],
+        answer: 'Nance\'s Axe',
+        exp: 'Nance\'s Axe is intentionally left on the mountain at the conclusion of "Top Man."'
+      },
+      // The Duel
+      {
+        q: 'Where is the story "The Duel" set?',
+        type: 'mc',
+        options: ['Revolutionary France','Imperial Russia','Victorian England','Ancient Rome'],
+        answer: 'Imperial Russia',
+        exp: '"The Duel" is set in Imperial Russia.'
+      },
+      {
+        q: 'Which conflict themes are central to "The Duel"?',
+        type: 'mc',
+        options: [
+          'Man vs. Nature and Man vs. Fate',
+          'Man vs. Society and Man vs. Technology',
+          'Man vs. Self and Man vs. Man',
+          'Man vs. Nature and Man vs. Man'
+        ],
+        answer: 'Man vs. Self and Man vs. Man',
+        exp: '"The Duel" focuses on Man vs. Self (internal moral conflict) and Man vs. Man (the conflict between characters).'
+      },
+      {
+        q: 'In "The Duel," what does the mother believe her son is doing while the duel takes place?',
+        type: 'mc',
+        options: [
+          'He is at a tavern drinking',
+          'He is sleeping upstairs in his room',
+          'He is traveling abroad',
+          'He is working at the military barracks'
+        ],
+        answer: 'He is sleeping upstairs in his room',
+        exp: 'In "The Duel," the mother believes her son is upstairs asleep in his room and is unaware he is participating in the duel.'
+      },
+      // The Silvermine
+      {
+        q: 'In "The Silvermine," why does the King want the silver from the mine?',
+        type: 'mc',
+        options: [
+          'To build a grand cathedral',
+          'To pay off his kingdom\'s debts',
+          'To fund his war against Denmark',
+          'To give to the poor'
+        ],
+        answer: 'To fund his war against Denmark',
+        exp: 'In "The Silvermine," the King desires the silver to finance his ongoing war against Denmark.'
+      },
+      {
+        q: 'Who convinces the King in "The Silvermine" that loyal soldiers are more valuable than money?',
+        type: 'mc',
+        options: ['The Queen','A knight','The Preacher','A court advisor'],
+        answer: 'The Preacher',
+        exp: 'In "The Silvermine," it is the Preacher who persuades the King that having loyal soldiers is more valuable than having silver.'
+      },
+      // Robert Louis Steven / Chumley
+      {
+        q: 'What is the central event of "Robert Louis Steven" (also known as "Chumley")?',
+        type: 'mc',
+        options: ['A love affair','A shipwreck','A murder','A political uprising'],
+        answer: 'A murder',
+        exp: 'The story known as "Chumley" (Robert Louis Steven) centers around a murder.'
+      },
+      {
+        q: 'In "Chumley," what are the men in the story asked to bring?',
+        type: 'mc',
+        options: ['Number Two shot','Number Four shot','A silver pistol','A hunting knife'],
+        answer: 'Number Four shot',
+        exp: 'In "Chumley" (Robert Louis Steven), the men are specifically asked to bring Number Four shot.'
+      },
+      // Treasure Island
+      {
+        q: 'What is the name of the inn featured in "Treasure Island"?',
+        type: 'mc',
+        options: ['The Black Spot Inn','The Hispaniola','The Admiral Benbow','The Spyglass Tavern'],
+        answer: 'The Admiral Benbow',
+        exp: 'The Admiral Benbow is the inn where Jim Hawkins lives and works at the beginning of "Treasure Island."'
+      },
+      {
+        q: 'In "Treasure Island," who is described as a friend of Jim Hopkins (Jim Hawkins)?',
+        type: 'mc',
+        options: ['Long John Silver','Captain Flint','Squire Trelawney','Doctor Smollett'],
+        answer: 'Squire Trelawney',
+        exp: 'Squire Trelawney and Jim Hopkins (Hawkins) are friends in "Treasure Island."'
+      },
+      {
+        q: 'In "Treasure Island," who feared the Black Spot?',
+        type: 'mc',
+        options: ['All the townspeople','Squire Trelawney and his men','Only the pirates','Captain Smollett only'],
+        answer: 'Only the pirates',
+        exp: 'The Black Spot was a pirate custom — a death threat. Only the pirates feared it; ordinary people did not understand or fear it in the same way.'
+      },
+      {
+        q: 'True or False: There is a character named "Peg Leg Pete" in "Treasure Island."',
+        type: 'tf',
+        options: ['True','False'],
+        answer: 'False',
+        exp: 'There is no character named "Peg Leg Pete" in "Treasure Island." The famous peg-legged pirate in the story is Long John Silver. "Peg Leg Pete" is from Disney\'s Mickey Mouse.'
+      },
+      // Neighbor Rosicky
+      {
+        q: 'In "Neighbor Rosicky," what does the doctor forbid Mr. Rosicky from doing?',
+        type: 'mc',
+        options: [
+          'Traveling out of state',
+          'Eating red meat',
+          'Working in the fields',
+          'Driving a horse and buggy'
+        ],
+        answer: 'Working in the fields',
+        exp: 'Due to his heart condition, the doctor forbids Mr. Rosicky from working in the fields in "Neighbor Rosicky."'
+      },
+      {
+        q: 'In "Neighbor Rosicky," what does the doctor advise regarding coffee, and how strictly does he enforce it?',
+        type: 'mc',
+        options: [
+          'He forbids coffee entirely and threatens consequences',
+          'He advises Rosicky to give up coffee but does not force him to',
+          'He encourages coffee as a heart stimulant',
+          'He prescribes special coffee made with herbs'
+        ],
+        answer: 'He advises Rosicky to give up coffee but does not force him to',
+        exp: 'The doctor advises Mr. Rosicky to give up coffee for his health but does not forcibly require it — he makes a suggestion, not a strict order.'
+      },
+      // Poems and Other Stories
+      {
+        q: 'Who wrote the poem "Old Man"?',
+        type: 'mc',
+        options: ['Dylan Thomas','James Weldon Johnson','Nathaniel Hawthorne','Ricardo Sanchez'],
+        answer: 'Ricardo Sanchez',
+        exp: '"Old Man" was written by Ricardo Sanchez.'
+      },
+      {
+        q: 'What is the central conflict in "Under the Lion\'s Paw"?',
+        type: 'mc',
+        options: [
+          'A man battles a pride of lions',
+          'A family faces hardship during a drought',
+          'A crooked landlord exploits a tenant farmer',
+          'A soldier returns home from war'
+        ],
+        answer: 'A crooked landlord exploits a tenant farmer',
+        exp: '"Under the Lion\'s Paw" involves a crooked landlord who exploits a hardworking tenant, exploring themes of injustice and greed.'
+      },
+      {
+        q: 'What is "Don Quixote" about?',
+        type: 'mc',
+        options: [
+          'A knight who fights a real dragon',
+          'A man who believes he is a knight and mistakes windmills for giants',
+          'A king who goes mad from power',
+          'A priest who travels the world performing miracles'
+        ],
+        answer: 'A man who believes he is a knight and mistakes windmills for giants',
+        exp: '"Don Quixote" features a man who becomes so consumed by tales of chivalry that he believes himself to be a knight and famously mistakes ordinary windmills for monstrous giants.'
+      },
+      {
+        q: 'In Dylan Thomas\'s poem, what does he urge his father to do in the face of death?',
+        type: 'mc',
+        options: [
+          '"Accept the dying of the light"',
+          '"Rage, rage against the dying of the light"',
+          '"Embrace the fading of the day"',
+          '"Surrender softly to the night"'
+        ],
+        answer: '"Rage, rage against the dying of the light"',
+        exp: 'Dylan Thomas\'s famous poem "Do Not Go Gentle into That Good Night" urges his father to "Rage, rage against the dying of the light" — to fight death, not accept it passively.'
+      },
+      {
+        q: 'James Weldon Johnson, one of the authors studied, was a native of which U.S. state?',
+        type: 'mc',
+        options: ['Georgia','New York','Louisiana','Florida'],
+        answer: 'Florida',
+        exp: 'James Weldon Johnson was born in Jacksonville, Florida, making him a native Floridian.'
+      },
+      {
+        q: 'In "Beauty and the Beast," which three elements are central to the story?',
+        type: 'mc',
+        options: [
+          'A dragon, a princess, and a wizard',
+          'A monster, a beautiful woman, and invisible servants',
+          'A king, a cursed mirror, and enchanted roses only',
+          'A sorcerer, twin sisters, and a magic spell'
+        ],
+        answer: 'A monster, a beautiful woman, and invisible servants',
+        exp: '"Beauty and the Beast" centers on a monster (the Beast), a beautiful woman (Beauty/Belle), and invisible servants who inhabit the enchanted castle.'
+      },
+      {
+        q: 'Who is the author of "The Open Window"?',
+        type: 'mc',
+        options: ['O. Henry','Edgar Allan Poe','Saki','Guy de Maupassant'],
+        answer: 'Saki',
+        exp: '"The Open Window" is a famous short story written by Saki (the pen name of H.H. Munro).'
+      },
+      {
+        q: 'Who wrote "My Last Duchess"?',
+        type: 'mc',
+        options: ['John Keats','Alfred Lord Tennyson','Percy Bysshe Shelley','Robert Browning'],
+        answer: 'Robert Browning',
+        exp: '"My Last Duchess" is a dramatic monologue written by the Victorian poet Robert Browning.'
+      },
+      {
+        q: 'The myth of "Phaeton" is primarily a story about which theme?',
+        type: 'mc',
+        options: [
+          'Courage in battle',
+          'Arrogance overwhelming common sense',
+          'A hero\'s journey to find purpose',
+          'The power of love conquering death'
+        ],
+        answer: 'Arrogance overwhelming common sense',
+        exp: 'The myth of Phaeton tells of a young man\'s arrogance — he insists on driving the sun chariot despite lacking the skill — and the catastrophic result when arrogance overrides wisdom.'
+      },
+      {
+        q: 'Who is the author of "Dr. Heidegger\'s Experiment"?',
+        type: 'mc',
+        options: ['Washington Irving','Herman Melville','Edgar Allan Poe','Nathaniel Hawthorne'],
+        answer: 'Nathaniel Hawthorne',
+        exp: '"Dr. Heidegger\'s Experiment" is a short story written by Nathaniel Hawthorne.'
+      },
+      // Shakespeare's Sonnets
+      {
+        q: 'How many sonnets did William Shakespeare write in total?',
+        type: 'mc',
+        options: ['100','116','150','154'],
+        answer: '154',
+        exp: 'Shakespeare wrote exactly 154 sonnets, which were published in 1609.'
+      },
+      {
+        q: 'Shakespeare\'s "Dark Lady" sonnets were written about whom?',
+        type: 'mc',
+        options: [
+          'His wife, Anne Hathaway',
+          'Queen Elizabeth I',
+          'His daughter Judith',
+          'His mistress'
+        ],
+        answer: 'His mistress',
+        exp: 'The "Dark Lady" sequence of sonnets is believed to have been written about Shakespeare\'s mistress, whose true identity remains debated by scholars.'
+      },
+      {
+        q: 'True or False: At least one of Shakespeare\'s 154 sonnets contains a direct mention of God.',
+        type: 'tf',
+        options: ['True','False'],
+        answer: 'False',
+        exp: 'Notably, none of Shakespeare\'s 154 sonnets makes any direct mention of God — this is considered a distinctive characteristic of the sequence.'
+      },
+      // Shakespeare's History
+      {
+        q: 'In what year did William Shakespeare die?',
+        type: 'mc',
+        options: ['1599','1603','1611','1616'],
+        answer: '1616',
+        exp: 'William Shakespeare died in 1616. Note: the study guide states 1617 — follow your class material for exam purposes. Shakespeare traditionally died on April 23, 1616.'
+      },
+      {
+        q: 'What was Shakespeare\'s FIRST play, and when was it written?',
+        type: 'mc',
+        options: [
+          'Hamlet, written in 1600',
+          'The Taming of the Shrew, written in 1590',
+          'Two Gentlemen of Verona, written in 1592',
+          'A Midsummer Night\'s Dream, written in 1595'
+        ],
+        answer: 'Two Gentlemen of Verona, written in 1592',
+        exp: 'According to the study guide, Shakespeare wrote his first play, "Two Gentlemen of Verona," in 1592.'
+      },
+      {
+        q: 'What was Shakespeare\'s LAST play, and when was it written?',
+        type: 'mc',
+        options: [
+          'King Lear, written in 1606',
+          'The Tempest, written in 1611',
+          'Othello, written in 1603',
+          'The Winter\'s Tale, written in 1610'
+        ],
+        answer: 'The Tempest, written in 1611',
+        exp: 'Shakespeare\'s final play was "The Tempest," written in 1611.'
+      },
+      {
+        q: 'Which theaters did Shakespeare own?',
+        type: 'mc',
+        options: [
+          'The Rose and The Swan',
+          'The Curtain and The Fortune',
+          'The Blackfriars and The Globe',
+          'The Lyceum and The Palladium'
+        ],
+        answer: 'The Blackfriars and The Globe',
+        exp: 'Shakespeare was a part-owner of two famous theaters: The Globe (an outdoor amphitheater) and The Blackfriars (an indoor theater).'
+      },
+      {
+        q: 'Which four genres of plays did Shakespeare write?',
+        type: 'mc',
+        options: [
+          'Epics, Dramas, Poems, and Farces',
+          'Comedies, Tragedies, Tragicomedies, and Histories',
+          'Romances, Satires, Comedies, and Tragedies only',
+          'Mysteries, Comedies, Histories, and Legends'
+        ],
+        answer: 'Comedies, Tragedies, Tragicomedies, and Histories',
+        exp: 'Shakespeare\'s plays are categorized into four genres: Comedies, Tragedies, Tragicomedies (Romances), and Histories.'
+      },
+      {
+        q: 'According to the study guide, how is a "tragicomedy" defined?',
+        type: 'mc',
+        options: [
+          'A play with equal amounts of humor and death',
+          'A play that involves loss but does NOT end in death',
+          'A comedy performed in a tragic style',
+          'A play that parodies a classic tragedy'
+        ],
+        answer: 'A play that involves loss but does NOT end in death',
+        exp: 'A Tragicomedy is defined as a play that involves elements of loss and sorrow (like a tragedy) but does NOT include a death — distinguishing it from a pure tragedy.'
+      },
+      // Julius Caesar
+      {
+        q: 'Who leads the conspiracy to assassinate Julius Caesar?',
+        type: 'mc',
+        options: ['Mark Antony','Brutus','Cassius','Gaius Octavius'],
+        answer: 'Cassius',
+        exp: 'Cassius is the driving force who organizes and heads the conspiracy against Caesar, recruiting other senators including Brutus.'
+      },
+      {
+        q: 'How does Cassius persuade Brutus to join the conspiracy against Caesar?',
+        type: 'mc',
+        options: [
+          'He bribes Brutus with gold and land',
+          'He threatens Brutus\'s family',
+          'He appeals to Brutus\'s pride and his noble Roman heritage',
+          'He shows Brutus forged evidence of Caesar\'s crimes'
+        ],
+        answer: 'He appeals to Brutus\'s pride and his noble Roman heritage',
+        exp: 'Cassius is a master manipulator who appeals to Brutus\'s sense of Roman honor and his family\'s legacy as protectors of the Republic to draw him into the conspiracy.'
+      },
+      {
+        q: 'True or False: Goats were found wandering in the streets of Rome the night before Julius Caesar\'s assassination.',
+        type: 'tf',
+        options: ['True','False'],
+        answer: 'False',
+        exp: 'According to the study guide, NO GOATS were found in the streets the night before Caesar\'s death. Various other omens were reported, but not goats.'
+      },
+      {
+        q: 'What famous warning is Julius Caesar given before his assassination?',
+        type: 'mc',
+        options: [
+          '"Trust no man in the senate halls"',
+          '"Beware the Ides of March"',
+          '"The knife comes for you, Caesar"',
+          '"Flee Rome before the new moon"'
+        ],
+        answer: '"Beware the Ides of March"',
+        exp: 'Caesar is warned by a soothsayer to "Beware the Ides of March" (March 15). He is also warned not to go to the senate on that day, but he ignores the warnings.'
+      },
+      {
+        q: 'Where is Julius Caesar killed?',
+        type: 'mc',
+        options: [
+          'In the Roman Forum',
+          'Inside the Colosseum',
+          'In the lobby of the Theater of Pompey',
+          'At the steps of the Parthenon'
+        ],
+        answer: 'In the lobby of the Theater of Pompey',
+        exp: 'Julius Caesar is assassinated in the lobby (portico) of the Theater of Pompey, where the senate was meeting temporarily.'
+      },
+      {
+        q: 'At Caesar\'s funeral, how does Mark Antony repeatedly refer to the conspirators in his speech?',
+        type: 'mc',
+        options: [
+          '"Traitors and murderers"',
+          '"Cowardly villains"',
+          '"Honorable men"',
+          '"The enemies of Rome"'
+        ],
+        answer: '"Honorable men"',
+        exp: 'In his famous funeral oration, Mark Antony uses the phrase "Brutus is an honorable man" (and refers to all conspirators as honorable men) — but uses it with increasing sarcasm to turn the crowd against them.'
+      },
+      {
+        q: 'Who does Mark Antony team up with to avenge the assassination of Julius Caesar?',
+        type: 'mc',
+        options: ['Brutus','Cassius','Gaius Octavius','Pompey'],
+        answer: 'Gaius Octavius',
+        exp: 'Mark Antony allies with Gaius Octavius (Caesar\'s adopted son and heir, later known as Augustus Caesar) to avenge Julius Caesar\'s murder.'
+      },
+      {
+        q: 'How does Brutus die at the end of "Julius Caesar"?',
+        type: 'mc',
+        options: [
+          'He is captured and publicly executed',
+          'He is killed by Mark Antony in single combat',
+          'He is poisoned by Cassius',
+          'He commits suicide after mistakenly believing a friend was killed in battle'
+        ],
+        answer: 'He commits suicide after mistakenly believing a friend was killed in battle',
+        exp: 'Brutus commits suicide (falls on his sword) at the end of Julius Caesar after he believes, mistakenly, that a friend has been killed in battle — paralleling the tragic misunderstanding that led Cassius to also take his own life.'
+      }
+    ]
+  },
+
+  // -------------------------------------------------------
+  // BIBLE – 36 questions
+  // -------------------------------------------------------
+  bible: {
+    name: 'Bible',
+    badgeClass: 'bib-badge',
+    badgeText: 'Bible',
+    timeLimit: 7200,
+    questions: [
+      // Doctrine of Sin
+      {
+        q: 'According to Romans 3:23, which of the following is true?',
+        type: 'mc',
+        options: [
+          'Only unbelievers have sinned',
+          'All people have sinned and fall short of the glory of God',
+          'Sin is only physical action, not a nature',
+          'Those who follow the law have not sinned'
+        ],
+        answer: 'All people have sinned and fall short of the glory of God',
+        exp: 'Romans 3:23 declares that "all have sinned and fall short of the glory of God" — without exception, every human being is a sinner.'
+      },
+      {
+        q: 'According to Romans 6:23, what is the consequence of sin?',
+        type: 'mc',
+        options: [
+          'Suffering in this life only',
+          'A long period of spiritual sleep',
+          'Death',
+          'Reincarnation'
+        ],
+        answer: 'Death',
+        exp: 'Romans 6:23 states "the wages of sin is death" — meaning sin results in both spiritual and physical death.'
+      },
+      {
+        q: 'According to the Doctrine of Sin, which two categories does sin include?',
+        type: 'mc',
+        options: [
+          'Moral sins and venial sins',
+          'Original sin and Personal sin',
+          'Deliberate sin and accidental sin',
+          'Private sin and public sin'
+        ],
+        answer: 'Original sin and Personal sin',
+        exp: 'The Doctrine of Sin distinguishes between Original sin (the sin nature inherited from Adam) and Personal sin (the individual sins we commit in thought, word, and deed).'
+      },
+      {
+        q: 'According to the Doctrine of Sin, sin includes which two dimensions?',
+        type: 'mc',
+        options: [
+          'Only intentional wrongdoing and hatred',
+          'Nature (what we are by birth) and actions (what we do)',
+          'Only the breaking of the Ten Commandments',
+          'Political wrongdoing and social injustice'
+        ],
+        answer: 'Nature (what we are by birth) and actions (what we do)',
+        exp: 'According to the study guide, sin includes both our sinful nature (what we are — inherited from Adam) and our sinful actions (what we do — personal choices).'
+      },
+      {
+        q: 'True or False: According to the Doctrine of Sin, only deliberate, intentional actions count as sin.',
+        type: 'tf',
+        options: ['True','False'],
+        answer: 'False',
+        exp: 'Sin includes both nature (original sin — the inherited sinful condition) and actions (personal sin). It is not limited to only deliberate acts; we are born with a sin nature.'
+      },
+      // Doctrine of Salvation
+      {
+        q: 'According to Ephesians 2:8–9, how is salvation received?',
+        type: 'mc',
+        options: [
+          'Through performing enough good deeds',
+          'Through baptism and confirmation',
+          'By grace through faith, not by works',
+          'Through following all of the commandments perfectly'
+        ],
+        answer: 'By grace through faith, not by works',
+        exp: 'Ephesians 2:8–9 states, "For it is by grace you have been saved, through faith — and this is not from yourselves, it is the gift of God — not by works, so that no one can boast."'
+      },
+      {
+        q: 'According to the Doctrine of Salvation, can a person earn their way to salvation through good works?',
+        type: 'mc',
+        options: [
+          'Yes, if the good deeds outweigh the bad',
+          'Yes, through a lifetime of religious service',
+          'No, salvation is a gift and cannot be earned',
+          'Yes, but only through extraordinary sacrifice'
+        ],
+        answer: 'No, salvation is a gift and cannot be earned',
+        exp: 'The Doctrine of Salvation clearly states that salvation is NOT earned by works — it is an undeserved gift from God, received by grace through faith in Jesus Christ.'
+      },
+      {
+        q: 'Who paid the penalty for humanity\'s sin, according to the Doctrine of Salvation?',
+        type: 'mc',
+        options: ['The church','The prophets of the Old Testament','Each individual person for themselves','Jesus Christ'],
+        answer: 'Jesus Christ',
+        exp: 'Jesus Christ paid the penalty (death) for humanity\'s sin by dying on the cross as our substitute — this is the foundation of the Christian doctrine of salvation.'
+      },
+      {
+        q: 'What is the FIRST stage of salvation according to the study guide?',
+        type: 'mc',
+        options: ['Sanctification','Glorification','Justification','Redemption'],
+        answer: 'Justification',
+        exp: 'The three stages of salvation are Justification (being declared righteous before God), Sanctification (growing in holiness), and Glorification (being made perfect in eternity).'
+      },
+      {
+        q: 'What is the correct ORDER of the three stages of salvation?',
+        type: 'mc',
+        options: [
+          'Glorification → Justification → Sanctification',
+          'Sanctification → Justification → Glorification',
+          'Justification → Sanctification → Glorification',
+          'Justification → Glorification → Sanctification'
+        ],
+        answer: 'Justification → Sanctification → Glorification',
+        exp: 'Salvation unfolds in three stages: Justification (declared righteous at the moment of faith), Sanctification (growing in holiness throughout life), and Glorification (perfected in heaven).'
+      },
+      // Doctrine of the Church
+      {
+        q: 'According to the Doctrine of the Church, who makes up "the Church"?',
+        type: 'mc',
+        options: [
+          'Only ordained ministers and priests',
+          'Members of a specific denomination',
+          'All true believers in Jesus Christ',
+          'Only those who have been formally baptized'
+        ],
+        answer: 'All true believers in Jesus Christ',
+        exp: 'The Church is not a building or denomination — it is the body of all true believers in Jesus Christ throughout the world and throughout history.'
+      },
+      {
+        q: 'According to Ephesians 5:23, who is the head of the Church?',
+        type: 'mc',
+        options: ['The Pope','A council of elders','The senior pastor','Christ'],
+        answer: 'Christ',
+        exp: 'Ephesians 5:23 states that "Christ is the head of the church." He is the supreme authority and leader of all believers.'
+      },
+      {
+        q: 'Which of the following is listed as a purpose of the Church in the study guide?',
+        type: 'mc',
+        options: [
+          'Political activism and social reform',
+          'Worship, fellowship, discipleship, and evangelism',
+          'Financial prosperity and community service only',
+          'Maintaining cultural traditions'
+        ],
+        answer: 'Worship, fellowship, discipleship, and evangelism',
+        exp: 'The Church has four main purposes according to the study guide: worship (honoring God), fellowship (community among believers), discipleship (spiritual growth), and evangelism (sharing the gospel).'
+      },
+      {
+        q: 'What are the two ordinances (sacred practices) of the Church?',
+        type: 'mc',
+        options: [
+          'Confirmation and Last Rites',
+          'Baptism and the Lord\'s Supper (Communion)',
+          'Tithing and Prayer',
+          'Fasting and Confession'
+        ],
+        answer: 'Baptism and the Lord\'s Supper (Communion)',
+        exp: 'The two ordinances of the Church are Baptism (symbolizing new life in Christ) and the Lord\'s Supper / Communion (commemorating Christ\'s sacrifice).'
+      },
+      {
+        q: 'True or False: According to the Doctrine of the Church, only ordained clergy are considered part of the true Church.',
+        type: 'tf',
+        options: ['True','False'],
+        answer: 'False',
+        exp: 'All believers — not just clergy — make up the Church. Every person who has trusted in Christ is part of the body of Christ.'
+      },
+      // Doctrine of the Bible
+      {
+        q: 'What is the central key idea of the Doctrine of the Bible (Bibliology)?',
+        type: 'mc',
+        options: [
+          'The Bible was written solely by human authors without divine guidance',
+          'The Bible is one of many equally authoritative religious texts',
+          'The Bible is God\'s inspired, infallible, and authoritative Word',
+          'The Bible requires the Church to interpret it correctly before it has authority'
+        ],
+        answer: 'The Bible is God\'s inspired, infallible, and authoritative Word',
+        exp: 'Bibliology teaches that the Bible is God-breathed (inspired), infallible (without error), and serves as the final authority for Christian faith and practice.'
+      },
+      {
+        q: 'According to 2 Timothy 3:16, the Bible is described as what?',
+        type: 'mc',
+        options: [
+          'Written by the apostles from memory',
+          'A collection of human wisdom about God',
+          'God-breathed (inspired by God)',
+          'Subject to revision by church councils'
+        ],
+        answer: 'God-breathed (inspired by God)',
+        exp: '2 Timothy 3:16 states, "All Scripture is God-breathed" (inspired by God) and is useful for teaching, rebuking, correcting, and training in righteousness.'
+      },
+      {
+        q: 'In theology, what does the term "Inspiration" refer to when discussing the Bible?',
+        type: 'mc',
+        options: [
+          'The Bible inspiring moral behavior in readers',
+          'God guiding the writers of Scripture so that the Bible is God\'s Word (God-breathed)',
+          'The way pastors are inspired to preach',
+          'Creative writing techniques used by Bible authors'
+        ],
+        answer: 'God guiding the writers of Scripture so that the Bible is God\'s Word (God-breathed)',
+        exp: 'Theological "inspiration" means God supernaturally guided the human authors of Scripture so that what they wrote was exactly what God intended — making the Bible the very Word of God.'
+      },
+      {
+        q: 'In theology, what does "Revelation" refer to regarding the Bible?',
+        type: 'mc',
+        options: [
+          'The last book of the Bible only',
+          'God revealing divine truth to humanity through His written Word',
+          'Personal visions and dreams experienced by believers',
+          'The process of translating Scripture into new languages'
+        ],
+        answer: 'God revealing divine truth to humanity through His written Word',
+        exp: 'In Bibliology, Revelation refers to God making truth known to humanity — specifically, God disclosing who He is and what He requires through Scripture.'
+      },
+      {
+        q: 'What is "Illumination" in the context of the Doctrine of the Bible?',
+        type: 'mc',
+        options: [
+          'The process of adding colorful illustrations to Scripture manuscripts',
+          'The physical printing of Bibles',
+          'The Holy Spirit helping believers understand and apply the meaning of Scripture',
+          'The public reading of Scripture in church'
+        ],
+        answer: 'The Holy Spirit helping believers understand and apply the meaning of Scripture',
+        exp: 'Illumination refers to the Holy Spirit\'s ongoing work of helping believers understand the truth and meaning of Scripture — it is how divine truth becomes personally understood.'
+      },
+      // Doctrine of God
+      {
+        q: 'Which Old Testament verse, known as the Shema, declares the uniqueness of God?',
+        type: 'mc',
+        options: ['Genesis 1:1','Psalm 23:1','Deuteronomy 6:4','Isaiah 40:28'],
+        answer: 'Deuteronomy 6:4',
+        exp: 'Deuteronomy 6:4 — the Shema — declares "Hear, O Israel: The Lord our God, the Lord is one." It is a foundational statement of monotheism.'
+      },
+      {
+        q: 'According to the Doctrine of God, how does God exist?',
+        type: 'mc',
+        options: [
+          'As a single Person with no distinctions',
+          'As a duality — Father and Son only',
+          'As the Trinity — Father, Son, and Holy Spirit',
+          'As an impersonal cosmic force'
+        ],
+        answer: 'As the Trinity — Father, Son, and Holy Spirit',
+        exp: 'Christianity teaches that the one true God exists eternally as three distinct Persons: Father, Son, and Holy Spirit — the doctrine of the Trinity.'
+      },
+      {
+        q: 'True or False: According to the Doctrine of God, God is one God existing as two persons (Father and Son).',
+        type: 'tf',
+        options: ['True','False'],
+        answer: 'False',
+        exp: 'God exists as the Trinity — three Persons (Father, Son, and Holy Spirit) in one divine Being. Not two, but three.'
+      },
+      {
+        q: 'Which of the following attributes of God is listed in the study guide?',
+        type: 'mc',
+        options: [
+          'Impersonal, distant, and unknowable',
+          'Holy, just, loving, all-powerful, and all-knowing',
+          'Bound by time and limited by human free will',
+          'Equal to human beings in nature'
+        ],
+        answer: 'Holy, just, loving, all-powerful, and all-knowing',
+        exp: 'The study guide lists God\'s attributes as holy (perfectly pure), just (perfectly fair), loving, omnipotent (all-powerful), and omniscient (all-knowing).'
+      },
+      // Doctrine of Angels
+      {
+        q: 'According to Colossians 1:16, what is the origin of angels?',
+        type: 'mc',
+        options: [
+          'They are eternal beings who always existed',
+          'They evolved from spiritual energy',
+          'They were created by God',
+          'They were once human beings who died righteously'
+        ],
+        answer: 'They were created by God',
+        exp: 'Colossians 1:16 states that all things — including angels — were created by God and for God. Angels are created beings, not eternal like God.'
+      },
+      {
+        q: 'According to Hebrews 1:14, what is the primary role of angels?',
+        type: 'mc',
+        options: [
+          'To judge humanity at the final day',
+          'To rule the earth on God\'s behalf',
+          'To serve as messengers and ministering spirits sent to serve believers',
+          'To record the deeds of all people'
+        ],
+        answer: 'To serve as messengers and ministering spirits sent to serve believers',
+        exp: 'Hebrews 1:14 describes angels as "ministering spirits sent to serve those who will inherit salvation" — they are servants of God assigned to help His people.'
+      },
+      {
+        q: 'True or False: The Bible teaches that angels should be worshipped alongside God.',
+        type: 'tf',
+        options: ['True','False'],
+        answer: 'False',
+        exp: 'The Doctrine of Angels explicitly states that angels are NOT to be worshipped. Only God is worthy of worship (Colossians 2:18, Revelation 22:8–9).'
+      },
+      // Doctrine of Satan and Demons
+      {
+        q: 'What was Satan before he fell, according to the study guide?',
+        type: 'mc',
+        options: [
+          'A human being who rejected God',
+          'A fallen angel',
+          'An evil force that always existed',
+          'A misguided archangel'
+        ],
+        answer: 'A fallen angel',
+        exp: 'Satan was originally a created angel — Lucifer — who fell through pride and rebellion against God, becoming the enemy of God and humanity.'
+      },
+      {
+        q: 'Which Scripture passage describes Satan\'s fall from heaven?',
+        type: 'mc',
+        options: ['Ezekiel 28:1–5','Isaiah 14:12–15','Revelation 12:1–6','Job 1:6–12'],
+        answer: 'Isaiah 14:12–15',
+        exp: 'Isaiah 14:12–15 is a key passage describing the fall of Lucifer (Satan), referencing his pride and his declaration "I will make myself like the Most High."'
+      },
+      {
+        q: 'According to 1 Peter 5:8, what does Satan seek to do?',
+        type: 'mc',
+        options: [
+          'Bring about world peace without God',
+          'Deceive people into good works done for wrong reasons',
+          'Prowl like a roaring lion, seeking to deceive and destroy',
+          'Persuade people to ignore God quietly'
+        ],
+        answer: 'Prowl like a roaring lion, seeking to deceive and destroy',
+        exp: '1 Peter 5:8 warns: "Your enemy the devil prowls around like a roaring lion looking for someone to devour." Satan actively seeks to deceive and destroy believers.'
+      },
+      {
+        q: 'According to James 4:7, how are believers instructed to deal with Satan?',
+        type: 'mc',
+        options: [
+          'Ignore him and he will go away',
+          'Engage him in debate to expose his lies',
+          'Resist him, and he will flee from you',
+          'Seek an exorcist to drive him away'
+        ],
+        answer: 'Resist him, and he will flee from you',
+        exp: 'James 4:7 instructs: "Submit yourselves to God. Resist the devil, and he will flee from you." Believers overcome Satan through submission to God and active resistance.'
+      },
+      {
+        q: 'Which passage in Ephesians describes the "armor of God" that believers are to use against spiritual attack?',
+        type: 'mc',
+        options: ['Ephesians 1','Ephesians 3','Ephesians 4','Ephesians 6'],
+        answer: 'Ephesians 6',
+        exp: 'Ephesians 6:10–18 describes the "Full Armor of God" — belt of truth, breastplate of righteousness, shield of faith, helmet of salvation, sword of the Spirit, and feet fitted with readiness.'
+      },
+      // Doctrine of Man
+      {
+        q: 'According to Genesis 1:26–27, in whose image were humans created?',
+        type: 'mc',
+        options: [
+          'In the image of the angels',
+          'In no particular image — humans evolved',
+          'In the image of God',
+          'In the image of the earth they were formed from'
+        ],
+        answer: 'In the image of God',
+        exp: 'Genesis 1:26–27 declares that God created human beings "in his own image" — the imago Dei. This gives humanity unique dignity and value above the rest of creation.'
+      },
+      {
+        q: 'According to 1 Thessalonians 5:23, a human being is composed of which three parts?',
+        type: 'mc',
+        options: [
+          'Mind, will, and emotion',
+          'Body, soul, and spirit',
+          'Flesh, blood, and breath',
+          'Heart, mind, and strength'
+        ],
+        answer: 'Body, soul, and spirit',
+        exp: '1 Thessalonians 5:23 mentions spirit, soul, and body as the three aspects of a whole human being, revealing humanity\'s multi-dimensional nature.'
+      },
+      {
+        q: 'According to Romans 5:12, how did sin enter the human race?',
+        type: 'mc',
+        options: [
+          'Through the angels who rebelled',
+          'Through humanity\'s environment and social pressures',
+          'Through Adam, and through him spread to all people',
+          'Through Eve alone — only women are responsible for sin'
+        ],
+        answer: 'Through Adam, and through him spread to all people',
+        exp: 'Romans 5:12 states, "sin entered the world through one man [Adam], and death through sin, and in this way death came to all people, because all sinned." Adam\'s sin brought the sin nature to all humanity.'
+      },
+      {
+        q: 'True or False: According to the Doctrine of Man, being created in God\'s image gives humans inherent value and dignity.',
+        type: 'tf',
+        options: ['True','False'],
+        answer: 'True',
+        exp: 'Because humans are made in the image of God (imago Dei), every person has inherent dignity and worth — a foundational truth of Christian anthropology.'
+      }
+    ]
+  }
+};
+
+/* =========================================================
+   APP STATE
+   ========================================================= */
+let state = {
+  subject: 'biology',
+  phase: 'intro',       // 'intro' | 'exam' | 'results'
+  questions: [],        // shuffled question objects with shuffled options
+  answers: {},          // { qIndex: selectedOption }
+  flags: {},            // { qIndex: true }
+  timerSeconds: 7200,
+  timerInterval: null,
+  startTime: null,
+  endTime: null
+};
+
+/* =========================================================
+   UTILITY
+   ========================================================= */
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function formatTime(secs) {
+  const h = Math.floor(secs / 3600);
+  const m = Math.floor((secs % 3600) / 60);
+  const s = secs % 60;
+  return `${h}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+}
+
+function elapsedFormatted() {
+  if (!state.startTime) return '0:00:00';
+  const diff = Math.floor(((state.endTime || Date.now()) - state.startTime) / 1000);
+  return formatTime(diff);
+}
+
+function getLetterGrade(pct) {
+  if (pct >= 90) return 'A';
+  if (pct >= 80) return 'B';
+  if (pct >= 70) return 'C';
+  if (pct >= 60) return 'D';
+  return 'F';
+}
+
+/* =========================================================
+   RENDER: INTRO
+   ========================================================= */
+function renderIntro() {
+  const data = EXAM_DATA[state.subject];
+  const count = data.questions.length;
+  const content = document.getElementById('content-area');
+  content.innerHTML = `
+    <div class="intro-screen">
+      <div class="intro-hero">
+        <div class="subject-badge ${data.badgeClass}">${data.badgeText}</div>
+        <h1 class="intro-title">${data.name} Final Exam</h1>
+        <p class="intro-sub">9th Grade · Comprehensive Practice Exam</p>
+        <div class="intro-stats">
+          <div class="stat-item"><div class="stat-num">${count}</div><div class="stat-label">Questions</div></div>
+          <div class="stat-item"><div class="stat-num">2:00</div><div class="stat-label">Time Limit</div></div>
+          <div class="stat-item"><div class="stat-num">MC + T/F</div><div class="stat-label">Question Types</div></div>
+        </div>
+        <button class="start-btn" id="start-btn">
+          <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+            <polygon points="5,3 15,9 5,15" fill="currentColor"/>
+          </svg>
+          Begin Exam
+        </button>
+      </div>
+      <div class="intro-instructions">
+        <h3>Instructions</h3>
+        <ul class="instruction-list">
+          <li><span class="icon">⏱</span>You have <strong style="color:var(--text)">2 hours</strong> to complete this exam. The timer starts when you click "Begin Exam."</li>
+          <li><span class="icon">🔀</span>Questions and answer choices are randomly shuffled every session for authentic practice.</li>
+          <li><span class="icon">🚩</span>Use the <strong style="color:var(--text)">Flag</strong> button to mark questions you want to review later.</li>
+          <li><span class="icon">📊</span>A progress bar and question navigator track your completion in real time.</li>
+          <li><span class="icon">✏️</span>You may freely change any answer before submitting.</li>
+          <li><span class="icon">✅</span>Click <strong style="color:var(--text)">Finish Exam</strong> when done. You will receive instant results with explanations.</li>
+          <li><span class="icon">⚠️</span>If time runs out, your exam will be auto-submitted.</li>
+        </ul>
+      </div>
+    </div>
+  `;
+  document.getElementById('start-btn').addEventListener('click', startExam);
+  document.getElementById('q-nav-panel').classList.remove('visible');
+  document.getElementById('header-timer').classList.add('hidden');
+}
+
+/* =========================================================
+   START EXAM
+   ========================================================= */
+function startExam() {
+  const data = EXAM_DATA[state.subject];
+  // Shuffle questions
+  state.questions = shuffle(data.questions).map((q, i) => {
+    const opts = q.type === 'tf' ? [...q.options] : shuffle([...q.options]);
+    return { ...q, options: opts, origIndex: i };
+  });
+  state.answers = {};
+  state.flags = {};
+  state.phase = 'exam';
+  state.timerSeconds = data.timeLimit;
+  state.startTime = Date.now();
+  state.endTime = null;
+
+  renderExam();
+  startTimer();
+  document.getElementById('header-timer').classList.remove('hidden');
+  if (window.innerWidth >= 1100) {
+    document.getElementById('q-nav-panel').classList.add('visible');
+  }
+}
+
+/* =========================================================
+   RENDER: EXAM
+   ========================================================= */
+function renderExam() {
+  const content = document.getElementById('content-area');
+  const qs = state.questions;
+
+  let qHTML = qs.map((q, i) => `
+    <div class="question-card" id="qcard-${i}" data-index="${i}">
+      <div class="q-header">
+        <span class="q-number">Question ${i + 1} of ${qs.length}</span>
+        <div class="q-header-right">
+          <span class="q-type-badge ${q.type === 'mc' ? 'q-type-mc' : 'q-type-tf'}">${q.type === 'mc' ? 'Multiple Choice' : 'True / False'}</span>
+          <button class="flag-btn" id="flag-btn-${i}" onclick="toggleFlag(${i})">
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+              <path d="M2 1v10M2 1h7l-2 3.5L9 8H2" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            Flag
+          </button>
+        </div>
+      </div>
+      <p class="q-text">${q.q}</p>
+      <div class="q-options">
+        ${q.options.map(opt => `
+          <label class="option-label">
+            <input type="radio" name="q${i}" value="${escHtml(opt)}" onchange="selectAnswer(${i}, '${escHtml(opt).replace(/'/g,"\\'")}')">
+            <div class="option-indicator"></div>
+            <span class="option-text">${opt}</span>
+          </label>
+        `).join('')}
+      </div>
+    </div>
+  `).join('');
+
+  content.innerHTML = `
+    <div class="exam-screen">
+      <div class="exam-topbar">
+        <div class="progress-info">
+          <span id="prog-answered">0 answered</span>
+          <span id="prog-remain">${qs.length} remaining</span>
+        </div>
+        <div class="progress-bar-track">
+          <div class="progress-bar-fill" id="progress-fill" style="width:0%"></div>
+        </div>
+      </div>
+      <div id="questions-container">${qHTML}</div>
+      <div class="exam-footer">
+        <button class="finish-btn" id="finish-btn">
+          <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+            <path d="M4 9h10M9 4l5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          Finish Exam
+        </button>
+      </div>
+    </div>
+  `;
+
+  document.getElementById('finish-btn').addEventListener('click', handleFinishClick);
+  updateNavPanel();
+}
+
+function escHtml(str) {
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+/* =========================================================
+   ANSWER SELECTION
+   ========================================================= */
+function selectAnswer(qIndex, optVal) {
+  state.answers[qIndex] = optVal;
+  updateProgress();
+  updateNavPanel();
+  const card = document.getElementById(`qcard-${qIndex}`);
+  if (card) card.classList.add('answered');
+}
+
+function toggleFlag(qIndex) {
+  state.flags[qIndex] = !state.flags[qIndex];
+  const btn = document.getElementById(`flag-btn-${qIndex}`);
+  const card = document.getElementById(`qcard-${qIndex}`);
+  if (state.flags[qIndex]) {
+    btn.classList.add('flagged');
+    btn.innerHTML = `<svg width="12" height="12" viewBox="0 0 12 12" fill="currentColor"><path d="M2 1v10M2 1h7l-2 3.5L9 8H2" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg> Flagged`;
+    card.classList.add('flagged');
+  } else {
+    btn.classList.remove('flagged');
+    btn.innerHTML = `<svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 1v10M2 1h7l-2 3.5L9 8H2" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg> Flag`;
+    card.classList.remove('flagged');
+  }
+  updateNavPanel();
+}
+
+/* =========================================================
+   PROGRESS
+   ========================================================= */
+function updateProgress() {
+  const total = state.questions.length;
+  const answered = Object.keys(state.answers).length;
+  const remain = total - answered;
+  const pct = total > 0 ? (answered / total) * 100 : 0;
+  const fillEl = document.getElementById('progress-fill');
+  const ansEl  = document.getElementById('prog-answered');
+  const remEl  = document.getElementById('prog-remain');
+  if (fillEl) fillEl.style.width = pct + '%';
+  if (ansEl)  ansEl.textContent = `${answered} answered`;
+  if (remEl)  remEl.textContent = `${remain} remaining`;
+}
+
+/* =========================================================
+   NAV PANEL
+   ========================================================= */
+function updateNavPanel() {
+  const dots = document.getElementById('q-dots');
+  if (!dots) return;
+  dots.innerHTML = state.questions.map((_, i) => {
+    let cls = 'q-dot';
+    if (state.answers[i] !== undefined) cls += ' answered';
+    if (state.flags[i]) cls += ' flagged';
+    return `<div class="${cls}" title="Question ${i+1}" onclick="scrollToQ(${i})">${i+1}</div>`;
+  }).join('');
+}
+
+function scrollToQ(i) {
+  const el = document.getElementById(`qcard-${i}`);
+  if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+/* =========================================================
+   TIMER
+   ========================================================= */
+function startTimer() {
+  clearInterval(state.timerInterval);
+  updateTimerDisplay();
+  state.timerInterval = setInterval(() => {
+    state.timerSeconds--;
+    updateTimerDisplay();
+    if (state.timerSeconds <= 0) {
+      clearInterval(state.timerInterval);
+      autoSubmit();
+    }
+  }, 1000);
+}
+
+function updateTimerDisplay() {
+  const el = document.getElementById('timer-display');
+  if (!el) return;
+  el.textContent = formatTime(state.timerSeconds);
+  if (state.timerSeconds <= 300) {
+    el.classList.add('urgent');
+  } else {
+    el.classList.remove('urgent');
+  }
+}
+
+function stopTimer() {
+  clearInterval(state.timerInterval);
+  state.endTime = Date.now();
+}
+
+/* =========================================================
+   FINISH / SUBMIT FLOW
+   ========================================================= */
+function handleFinishClick() {
+  const total = state.questions.length;
+  const answered = Object.keys(state.answers).length;
+  const unanswered = total - answered;
+  const flagged = Object.values(state.flags).filter(Boolean).length;
+
+  const statsHTML = `
+    <div class="modal-stats" id="modal-stats">
+      <div class="modal-stat ${unanswered > 0 ? 'warn' : 'ok'}">
+        <div class="n">${unanswered}</div>
+        <div class="l">Unanswered</div>
+      </div>
+      <div class="modal-stat">
+        <div class="n" style="color:var(--flag)">${flagged}</div>
+        <div class="l">Flagged</div>
+      </div>
+      <div class="modal-stat ok">
+        <div class="n">${answered}</div>
+        <div class="l">Answered</div>
+      </div>
+      <div class="modal-stat">
+        <div class="n" style="color:var(--text2)">${total}</div>
+        <div class="l">Total</div>
+      </div>
+    </div>
+  `;
+
+  const body = unanswered > 0
+    ? `You have <strong style="color:var(--warning)">${unanswered} unanswered question${unanswered !== 1 ? 's' : ''}</strong>. ${flagged > 0 ? `You also have <strong style="color:var(--flag)">${flagged} flagged question${flagged !== 1 ? 's' : ''}</strong> to review. ` : ''}Are you sure you want to submit?`
+    : flagged > 0
+      ? `All questions are answered! You still have <strong style="color:var(--flag)">${flagged} flagged question${flagged !== 1 ? 's' : ''}</strong>. Ready to submit?`
+      : 'All questions answered. Ready to submit your exam?';
+
+  showModal(
+    'Submit Exam?',
+    body + statsHTML,
+    [
+      { label: 'Go Back', cls: 'btn-secondary', action: closeModal },
+      { label: 'Submit Now', cls: 'btn-danger', action: submitExam }
+    ]
+  );
+}
+
+function autoSubmit() {
+  closeModal();
+  submitExam();
+}
+
+function submitExam() {
+  closeModal();
+  stopTimer();
+  state.phase = 'results';
+  renderResults();
+  document.getElementById('q-nav-panel').classList.remove('visible');
+  document.getElementById('header-timer').classList.add('hidden');
+}
+
+/* =========================================================
+   MODAL
+   ========================================================= */
+function showModal(title, bodyHtml, actions) {
+  document.getElementById('modal-title').textContent = title;
+  document.getElementById('modal-body').innerHTML = bodyHtml;
+  const actionsEl = document.getElementById('modal-actions');
+  actionsEl.innerHTML = actions.map((a, i) =>
+    `<button class="${a.cls}" id="modal-action-${i}">${a.label}</button>`
+  ).join('');
+  actions.forEach((a, i) => {
+    document.getElementById(`modal-action-${i}`).addEventListener('click', a.action);
+  });
+  document.getElementById('modal-overlay').classList.remove('hidden');
+}
+
+function closeModal() {
+  document.getElementById('modal-overlay').classList.add('hidden');
+}
+
+document.getElementById('modal-overlay').addEventListener('click', e => {
+  if (e.target === document.getElementById('modal-overlay')) closeModal();
+});
+
+/* =========================================================
+   RENDER: RESULTS
+   ========================================================= */
+function renderResults() {
+  const qs = state.questions;
+  let correct = 0;
+  qs.forEach((q, i) => {
+    if (state.answers[i] === q.answer) correct++;
+  });
+  const total = qs.length;
+  const pct = total > 0 ? Math.round((correct / total) * 100) : 0;
+  const grade = getLetterGrade(pct);
+  const elapsed = elapsedFormatted();
+
+  const data = EXAM_DATA[state.subject];
+
+  // Grade circle color class
+  let gradeClass = 'grade-A';
+  if (grade === 'B') gradeClass = 'grade-B';
+  else if (grade === 'C') gradeClass = 'grade-C';
+  else if (grade === 'D' || grade === 'F') gradeClass = 'grade-D';
+
+  const reviewHTML = qs.map((q, i) => {
+    const userAns = state.answers[i];
+    const isCorrect = userAns === q.answer;
+    const cardCls = isCorrect ? 'review-card correct' : 'review-card incorrect';
+
+    let userRow = '';
+    if (userAns === undefined) {
+      userRow = `<div class="review-ans unanswered">⚠ Not answered</div>`;
+    } else if (isCorrect) {
+      userRow = `<div class="review-ans user-correct">✓ Your answer: ${escHtml(userAns)}</div>`;
+    } else {
+      userRow = `<div class="review-ans user-wrong">✗ Your answer: ${escHtml(userAns)}</div>`;
+    }
+
+    let correctRow = '';
+    if (!isCorrect) {
+      correctRow = `<div class="review-ans show-correct">✓ Correct answer: ${escHtml(q.answer)}</div>`;
+    }
+
+    return `
+      <div class="${cardCls}">
+        <div class="review-q-num">Question ${i + 1} · ${q.type === 'mc' ? 'Multiple Choice' : 'True / False'} · ${isCorrect ? '<span style="color:var(--success)">Correct</span>' : '<span style="color:var(--error)">Incorrect</span>'}</div>
+        <div class="review-q-text">${q.q}</div>
+        <div class="review-answers">${userRow}${correctRow}</div>
+        <div class="review-explanation"><strong>Explanation:</strong> ${q.exp}</div>
+      </div>
+    `;
+  }).join('');
+
+  document.getElementById('content-area').innerHTML = `
+    <div class="results-screen">
+      <div class="results-hero">
+        <div class="subject-badge ${data.badgeClass}">${data.badgeText}</div>
+        <div class="grade-circle ${gradeClass}">${grade}</div>
+        <div class="results-score">${pct}% — ${correct} / ${total} Correct</div>
+        <div class="results-sub">Final Exam Score · ${data.name}</div>
+        <div class="results-stats-grid">
+          <div class="r-stat"><div class="n" style="color:var(--success)">${correct}</div><div class="l">Correct</div></div>
+          <div class="r-stat"><div class="n" style="color:var(--error)">${total - correct}</div><div class="l">Incorrect</div></div>
+          <div class="r-stat"><div class="n">${pct}%</div><div class="l">Score</div></div>
+          <div class="r-stat"><div class="n" style="color:var(--text2)">${elapsed}</div><div class="l">Time Taken</div></div>
+        </div>
+        <button class="retake-btn" onclick="retake()">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+            <path d="M2 8C2 4.686 4.686 2 8 2c2.21 0 4.157 1.13 5.293 2.836" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+            <path d="M14 3v4h-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M14 8c0 3.314-2.686 6-6 6S2 11.314 2 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-dasharray="1 2"/>
+          </svg>
+          Retake Exam
+        </button>
+      </div>
+      <div class="review-section">
+        <div class="review-title">Detailed Review</div>
+        ${reviewHTML}
+      </div>
+    </div>
+  `;
+}
+
+/* =========================================================
+   RETAKE
+   ========================================================= */
+function retake() {
+  state.phase = 'intro';
+  stopTimer();
+  renderIntro();
+}
+
+/* =========================================================
+   TAB NAVIGATION
+   ========================================================= */
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    if (state.phase === 'exam') {
+      showModal(
+        'Leave Exam?',
+        'Switching subjects will end your current exam and your progress will be lost. Are you sure?',
+        [
+          { label: 'Stay', cls: 'btn-secondary', action: closeModal },
+          { label: 'Leave', cls: 'btn-danger', action: () => {
+              closeModal();
+              stopTimer();
+              switchSubject(btn.dataset.subject);
+            }
+          }
+        ]
+      );
+    } else {
+      switchSubject(btn.dataset.subject);
+    }
+  });
+});
+
+function switchSubject(subject) {
+  state.subject = subject;
+  state.phase = 'intro';
+  document.querySelectorAll('.tab-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.subject === subject);
+  });
+  renderIntro();
+}
+
+/* =========================================================
+   INIT
+   ========================================================= */
+renderIntro();
+</script>
+</body>
+</html>
